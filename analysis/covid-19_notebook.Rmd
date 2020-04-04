@@ -166,7 +166,7 @@ data %>%
 
 data %>% 
   filter(date == latest_date,
-         cases_cum >= 1000) %>% 
+         deaths_cum >= 10) %>% 
   top_n(20, deaths_growth_rate_pct) %>% 
   ggplot(aes(y = reorder(country, deaths_growth_rate_pct), x = deaths_growth_rate_pct)) + 
   geom_bar(stat = "identity")
