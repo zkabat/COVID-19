@@ -435,4 +435,4 @@ data %>%
 data %>% 
   filter(country %in% top_country_range(11, 20, deaths_new)) %>% 
   plot_trend(days_since_limit_death_rate, deaths_cum_per_100k, MAX_DAYS)
-```g
+```
