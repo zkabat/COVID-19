@@ -7,6 +7,9 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+
+# Load libraries
+
 library(flexdashboard)
 library(readr)
 library(dplyr)
@@ -16,11 +19,74 @@ library(ggplot2)
 library(plotly)
 library(DT)
 
+# Load constants
+
 LIMIT_CASE <- 100
 LIMIT_DEATH <- 10
 
 LIMIT_CASE_RATE <- 1
 LIMIT_DEATH_RATE <- 0.1
+
+CASE_CUTOFF <- 1000
+MAX_DAYS <- 40
+
+# Load functions
+
+plot_data <- function(data, date, var, n = 20, plotly = TRUE) {
+  date_ <- date
+  var <- enquo(var)
+  
+  g <- data %>% 
+    filter(date == date_) %>% 
+    top_n(n, !!var) %>% 
+    ggplot(aes(y = reorder(country, !!var), x = !!var)) + 
+    geom_bar(stat = "identity")
+  
+  if (plotly) {
+    ggplotly(g)
+  } else {
+    g
+  }
+}
+
+plot_trend <- function(data, xvar, yvar, xvar_max = NULL, plotly = TRUE) {
+  xvar <- enquo(xvar)
+  yvar <- enquo(yvar)
+  
+  g <- data %>% 
+    filter(!!xvar != 0,
+           !!xvar <= xvar_max) %>% 
+    ggplot(aes(x = !!xvar, y = !!yvar, color = country)) + 
+    geom_line() + geom_point() +
+    scale_y_continuous(trans='log10')
+  
+  if (plotly) {
+    ggplotly(g)
+  } else {
+    g
+  }
+}
+
+top_countries <- function(n, var) {
+  var <- enquo(var)
+  
+  data %>% 
+    filter(date == latest_date) %>% 
+    top_n(n, !!var) %>% 
+    pull(country)
+}
+
+top_country_range <- function(n, m, var) {
+  var <- enquo(var)
+  
+  if (n == 1) {
+    top_countries(m, !!var)
+  } else {
+    setdiff(top_countries(m, !!var), top_countries(n-1, !!var))
+  }
+}
+
+# Read input data
 
 # https://data.worldbank.org/indicator/SP.POP.TOTL
 pop_raw <- read_csv("../analysis/API_SP.POP.TOTL_DS2_en_csv_v2_887275.csv", 
@@ -36,6 +102,8 @@ time_series_covid19_confirmed_global <-
 time_series_covid19_deaths_global <- 
   read_csv(paste0("../csse_covid_19_data/csse_covid_19_time_series/",
                   "time_series_covid19_deaths_global.csv"))
+
+# Prepare data
 
 cases <- time_series_covid19_confirmed_global %>% 
   select(-`Province/State`, -Lat, -Long) %>% 
@@ -122,12 +190,17 @@ Column {data-width=500}
 ### Global cases and deaths
 
 ```{r}
-data %>%
+data_sum <- data %>%
   select(date, cases_cum, cases_new, deaths_cum, deaths_new) %>% 
   group_by(date) %>% 
-  summarize_all(.funs = sum, na.rm = TRUE) %>% 
+  summarize_all(.funs = sum, na.rm = TRUE)
+
+data_sum %>% 
   arrange(desc(date)) %>% 
-  datatable()
+  datatable(colnames = c("Date", "Total cases", "New cases",
+                         "Total deaths", "New deaths"),
+            rownames = FALSE,
+            options = list(pageLength = 20))
 ```
 
 Column {data-width=500}
@@ -136,10 +209,7 @@ Column {data-width=500}
 ### Global new cases
 
 ```{r}
-g <- data %>%
-  select(date, cases_cum, cases_new, deaths_cum, deaths_new) %>% 
-  group_by(date) %>% 
-  summarize_all(.funs = sum, na.rm = TRUE) %>% 
+g <- data_sum %>% 
   filter(date >= dmy("01-03-2020")) %>% 
   ggplot(aes(x = date, y = cases_new)) + 
   geom_point(color = "navy") + geom_smooth()
@@ -150,10 +220,7 @@ ggplotly(g)
 ### Global new deaths
 
 ```{r}
-g <- data %>%
-  select(date, cases_cum, cases_new, deaths_cum, deaths_new) %>% 
-  group_by(date) %>% 
-  summarize_all(.funs = sum, na.rm = TRUE) %>% 
+g <- data_sum %>% 
   filter(date >= dmy("01-03-2020")) %>% 
   ggplot(aes(x = date, y = deaths_new)) + 
   geom_point(color = "navy") + geom_smooth()
@@ -174,7 +241,7 @@ data %>%
   filter(date == latest_date) %>% 
   select(country, cases_cum, cases_new, 
          cases_cum_per_100k, cases_new_per_100k) %>% 
-  arrange(desc(cases_cum)) %>% 
+  arrange(desc(cases_new)) %>% 
   datatable(colnames = c("Country", "Total cases", "New cases",
                          "Total cases per 100k", "New cases per 100k"),
             rownames = FALSE,
@@ -189,26 +256,15 @@ Column {data-width=500}
 
 
 ```{r}
-g <- data %>% 
-  filter(date == latest_date) %>% 
-  top_n(20, cases_cum) %>% 
-  ggplot(aes(y = reorder(country, cases_cum), x = cases_cum)) + 
-  geom_bar(stat = "identity")
-
-ggplotly(g)
+plot_data(data, latest_date, cases_cum)
 ```
 
 ### Total case rate per country
 
 ```{r}
-g <- data %>% 
-  filter(date == latest_date,
-         cases_cum >= 1000) %>% 
-  top_n(20, cases_cum_per_100k) %>% 
-  ggplot(aes(y = reorder(country, cases_cum_per_100k), x = cases_cum_per_100k))+ 
-  geom_bar(stat = "identity")
-
-ggplotly(g)
+data %>% 
+  filter(cases_cum >= CASE_CUTOFF) %>% 
+  plot_data(latest_date, cases_cum_per_100k)
 ```
 
 
@@ -218,28 +274,165 @@ Column {data-width=500}
 ### Total new cases per country
 
 ```{r}
-g <- data %>% 
-  filter(date == latest_date) %>% 
-  top_n(20, cases_new) %>% 
-  ggplot(aes(y = reorder(country, cases_new), x = cases_new)) + 
-  geom_bar(stat = "identity")
-
-ggplotly(g)
+plot_data(data, latest_date, cases_new)
 ```
 
 
 ### Total new case rate per country
 
 ```{r}
-g <- data %>% 
-  filter(date == latest_date,
-         cases_cum >= 1000) %>% 
-  top_n(20, cases_new_per_100k) %>% 
-  ggplot(aes(y = reorder(country, cases_new_per_100k), x = cases_new_per_100k))+ 
-  geom_bar(stat = "identity")
-
-ggplotly(g)
+data %>% 
+  filter(cases_cum >= CASE_CUTOFF) %>% 
+  plot_data(latest_date, cases_new_per_100k)
 ```
 
 
+Death overview
+=======================================================================
 
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Deaths last day
+
+```{r}
+data %>% 
+  filter(date == latest_date) %>% 
+  select(country, deaths_cum, deaths_new, 
+         deaths_cum_per_100k, deaths_new_per_100k) %>% 
+  arrange(desc(deaths_new)) %>% 
+  datatable(colnames = c("Country", "Total deaths", "New deaths",
+                         "Total deaths per 100k", "New deaths per 100k"),
+            rownames = FALSE,
+            options = list(pageLength = 15))
+```
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Total deaths per country
+
+
+```{r}
+plot_data(data, latest_date, deaths_cum)
+```
+
+### Total death rate per country
+
+```{r}
+data %>% 
+  filter(cases_cum >= CASE_CUTOFF) %>% 
+  plot_data(latest_date, deaths_cum_per_100k)
+```
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Total new deaths per country
+
+```{r}
+plot_data(data, latest_date, deaths_new)
+```
+
+
+### Total new death rate per country
+
+```{r}
+data %>% 
+  filter(cases_cum >= CASE_CUTOFF) %>% 
+  plot_data(latest_date, deaths_new_per_100k)
+```
+
+Case trends
+=======================================================================
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Case trend for top 10 countries
+
+Top 10 countries according to new cases on the last day.
+
+```{r}
+data %>% 
+  filter(country %in% top_country_range(1, 10, cases_new)) %>% 
+  plot_trend(days_since_limit_case, cases_cum, MAX_DAYS)
+```
+
+### Case trend for top 11-20 countries
+
+```{r}
+data %>% 
+  filter(country %in% top_country_range(11, 20, cases_new)) %>% 
+  plot_trend(days_since_limit_case, cases_cum, MAX_DAYS)
+```
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Case rate trend for top 10 countries
+
+Top 10 countries according to new cases on the last day.
+
+```{r}
+data %>% 
+  filter(country %in% top_country_range(1, 10, cases_new)) %>% 
+  plot_trend(days_since_limit_case_rate, cases_cum_per_100k, MAX_DAYS)
+```
+
+### Case rate trend for top 11-20 countries
+
+```{r}
+data %>% 
+  filter(country %in% top_country_range(11, 20, cases_new)) %>% 
+  plot_trend(days_since_limit_case_rate, cases_cum_per_100k, MAX_DAYS)
+```
+
+Death trends
+=======================================================================
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Death trend for top 10 countries
+
+Top 10 countries according to new deaths on the last day.
+
+```{r}
+data %>% 
+  filter(country %in% top_country_range(1, 10, deaths_new)) %>% 
+  plot_trend(days_since_limit_death, deaths_cum, MAX_DAYS)
+```
+
+### Death trend for top 11-20 countries
+
+```{r}
+data %>% 
+  filter(country %in% top_country_range(11, 20, deaths_new)) %>% 
+  plot_trend(days_since_limit_death, deaths_cum, MAX_DAYS)
+```
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Death rate trend for top 10 countries
+
+Top 10 countries according to new deaths on the last day.
+
+```{r}
+data %>% 
+  filter(country %in% top_country_range(1, 10, deaths_new)) %>% 
+  plot_trend(days_since_limit_death_rate, deaths_cum_per_100k, MAX_DAYS)
+```
+
+### Death rate trend for top 11-20 countries
+
+```{r}
+data %>% 
+  filter(country %in% top_country_range(11, 20, deaths_new)) %>% 
+  plot_trend(days_since_limit_death_rate, deaths_cum_per_100k, MAX_DAYS)
+```g
