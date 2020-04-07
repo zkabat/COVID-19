@@ -41,7 +41,8 @@ plot_data <- function(data, date, var, n = 20, plotly = TRUE) {
     filter(date == date_) %>% 
     top_n(n, !!var) %>% 
     ggplot(aes(y = reorder(country, !!var), x = !!var)) + 
-    geom_bar(stat = "identity") +
+    geom_bar(stat = "identity") + 
+    theme_light() +
     theme(axis.title.y=element_blank())
   
   if (plotly) {
@@ -59,7 +60,8 @@ plot_trend <- function(data, xvar, yvar, xvar_max = NULL, plotly = TRUE) {
     filter(!!xvar != 0,
            !!xvar <= xvar_max) %>% 
     ggplot(aes(x = !!xvar, y = !!yvar, color = country)) + 
-    geom_line() + scale_y_continuous(trans='log10')
+    geom_line() + scale_y_continuous(trans='log10') +
+    theme_light()
   
   if (plotly) {
     ggplotly(g)
