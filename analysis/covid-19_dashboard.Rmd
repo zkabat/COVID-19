@@ -28,6 +28,7 @@ LIMIT_CASE_RATE <- 1
 LIMIT_DEATH_RATE <- 0.1
 
 CASE_CUTOFF <- 1000
+DEATH_CUTOFF <- 50
 MAX_DAYS <- 40
 
 # Load functions
@@ -67,7 +68,7 @@ plot_trend <- function(data, xvar, yvar, xvar_max = NULL, plotly = TRUE) {
   }
 }
 
-top_countries <- function(n, var) {
+top_countries <- function(data, n, var) {
   var <- enquo(var)
   
   data %>% 
@@ -76,16 +77,18 @@ top_countries <- function(n, var) {
     pull(country)
 }
 
-top_country_range <- function(n, m, var) {
+top_country_range <- function(data, n, m, var) {
   var <- enquo(var)
   
   if (n == 1) {
-    top_countries(m, !!var)
+    top_countries(data, m, !!var)
   } else {
-    setdiff(top_countries(m, !!var), top_countries(n-1, !!var))
+    setdiff(top_countries(data, m, !!var), top_countries(data, n-1, !!var))
   }
 }
+```
 
+```{r}
 # Read input data
 
 # https://data.worldbank.org/indicator/SP.POP.TOTL
@@ -359,7 +362,7 @@ Top 10 countries according to new cases on the last day.
 
 ```{r}
 data %>% 
-  filter(country %in% top_country_range(1, 10, cases_new)) %>% 
+  filter(country %in% top_country_range(., 1, 10, cases_new)) %>% 
   plot_trend(days_since_limit_case, cases_cum, MAX_DAYS)
 ```
 
@@ -367,7 +370,7 @@ data %>%
 
 ```{r}
 data %>% 
-  filter(country %in% top_country_range(11, 20, cases_new)) %>% 
+  filter(country %in% top_country_range(., 11, 20, cases_new)) %>% 
   plot_trend(days_since_limit_case, cases_cum, MAX_DAYS)
 ```
 
@@ -377,19 +380,25 @@ Column {data-width=500}
 
 ### Case rate trend for top 10 countries
 
-Top 10 countries according to new cases on the last day.
+Top 10 countries according to new case rate on the last days, countries with min. 1000 cases.
 
 ```{r}
-data %>% 
-  filter(country %in% top_country_range(1, 10, cases_new)) %>% 
+data %>%  
+  group_by(country) %>% 
+  filter(max(cases_cum) >= CASE_CUTOFF) %>% 
+  ungroup() %>%
+  filter(country %in% top_country_range(., 1, 10, cases_new_per_100k)) %>% 
   plot_trend(days_since_limit_case_rate, cases_cum_per_100k, MAX_DAYS)
 ```
 
 ### Case rate trend for top 11-20 countries
 
 ```{r}
-data %>% 
-  filter(country %in% top_country_range(11, 20, cases_new)) %>% 
+data %>%   
+  group_by(country) %>% 
+  filter(max(cases_cum) >= CASE_CUTOFF) %>% 
+  ungroup() %>%
+  filter(country %in% top_country_range(., 11, 20, cases_new_per_100k)) %>% 
   plot_trend(days_since_limit_case_rate, cases_cum_per_100k, MAX_DAYS)
 ```
 
@@ -405,7 +414,7 @@ Top 10 countries according to new deaths on the last day.
 
 ```{r}
 data %>% 
-  filter(country %in% top_country_range(1, 10, deaths_new)) %>% 
+  filter(country %in% top_country_range(., 1, 10, deaths_new)) %>% 
   plot_trend(days_since_limit_death, deaths_cum, MAX_DAYS)
 ```
 
@@ -413,7 +422,7 @@ data %>%
 
 ```{r}
 data %>% 
-  filter(country %in% top_country_range(11, 20, deaths_new)) %>% 
+  filter(country %in% top_country_range(., 11, 20, deaths_new)) %>% 
   plot_trend(days_since_limit_death, deaths_cum, MAX_DAYS)
 ```
 
@@ -423,11 +432,14 @@ Column {data-width=500}
 
 ### Death rate trend for top 10 countries
 
-Top 10 countries according to new deaths on the last day.
+Top 10 countries according to new death rate on the last day, countries with min. 50 deaths.
 
 ```{r}
 data %>% 
-  filter(country %in% top_country_range(1, 10, deaths_new)) %>% 
+  group_by(country) %>% 
+  filter(max(deaths_cum) >= DEATH_CUTOFF) %>% 
+  ungroup() %>% 
+  filter(country %in% top_country_range(., 1, 10, deaths_new_per_100k)) %>% 
   plot_trend(days_since_limit_death_rate, deaths_cum_per_100k, MAX_DAYS)
 ```
 
@@ -435,6 +447,9 @@ data %>%
 
 ```{r}
 data %>% 
-  filter(country %in% top_country_range(11, 20, deaths_new)) %>% 
+  group_by(country) %>% 
+  filter(max(deaths_cum) >= DEATH_CUTOFF) %>% 
+  ungroup() %>% 
+  filter(country %in% top_country_range(., 11, 20, deaths_new_per_100k)) %>% 
   plot_trend(days_since_limit_death_rate, deaths_cum_per_100k, MAX_DAYS)
 ```
