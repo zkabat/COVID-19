@@ -40,7 +40,8 @@ plot_data <- function(data, date, var, n = 20, plotly = TRUE) {
     filter(date == date_) %>% 
     top_n(n, !!var) %>% 
     ggplot(aes(y = reorder(country, !!var), x = !!var)) + 
-    geom_bar(stat = "identity")
+    geom_bar(stat = "identity") +
+    theme(axis.title.y=element_blank())
   
   if (plotly) {
     ggplotly(g)
@@ -57,8 +58,7 @@ plot_trend <- function(data, xvar, yvar, xvar_max = NULL, plotly = TRUE) {
     filter(!!xvar != 0,
            !!xvar <= xvar_max) %>% 
     ggplot(aes(x = !!xvar, y = !!yvar, color = country)) + 
-    geom_line() + geom_point() +
-    scale_y_continuous(trans='log10')
+    geom_line() + scale_y_continuous(trans='log10')
   
   if (plotly) {
     ggplotly(g)
@@ -148,7 +148,8 @@ mapping <- tibble(
       "Korea, Rep.", "Kyrgyz Republic", "Lao PDR", "MS Zaandam", 
       "Russian Federation", "St. Kitts and Nevis", "St. Lucia" , 
       "St. Vincent and the Grenadines", "Slovak Republic", 
-      "Syrian Arab Republic", "Taiwan*", "United States", "Venezuela, RB"),
+      "Syrian Arab Republic", "Taiwan*", "United States", "Venezuela, RB",
+      "Western Sahara"),
   country_covid = as.character(setdiff(data$country, pop_raw$country))
 )
 
@@ -160,6 +161,7 @@ pop$population[pop$country == "Diamond Princess"] <- 3711
 pop$population[pop$country == "MS Zaandam"] <- 1829
 pop$population[pop$country == "Holy See"] <- 800
 pop$population[pop$country == "Taiwan*"] <- 23780452
+pop$population[pop$country == "Western Sahara"] <- 567402
 
 data <- left_join(data, pop)
 
