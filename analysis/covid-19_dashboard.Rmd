@@ -60,12 +60,14 @@ plot_trend <- function(data, xvar, yvar, xvar_max = NULL, plotly = TRUE) {
   g <- data %>% 
     filter(!!xvar != 0,
            !!xvar <= xvar_max) %>% 
+    # highlight_key(~country) %>% 
     ggplot(aes(x = !!xvar, y = !!yvar, color = country)) + 
     geom_line() + scale_y_continuous(trans='log10') +
     theme_light()
   
   if (plotly) {
     ggplotly(g)
+    # %>% highlight(on = "plotly_hover")
   } else {
     g
   }
