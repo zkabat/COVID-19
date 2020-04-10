@@ -30,24 +30,29 @@ LIMIT_DEATH_RATE <- 0.1
 CASE_CUTOFF <- 1000
 DEATH_CUTOFF <- 50
 MAX_DAYS <- 40
-SMOOTH_WINDOW <- 5
+SMOOTH_WINDOW <- 7
 
 # Load functions
 
-plot_data <- function(data, date, var, n = 20, plotly = TRUE) {
+plot_data <- function(data, date, var, group_var = NULL, n = 20, plotly = TRUE) {
   date_ <- date
   var <- enquo(var)
+  group_var <- enquo(group_var)
+  levels <- levels(pull(data, !!group_var))
   
   g <- data %>% 
     filter(date == date_) %>% 
     top_n(n, !!var) %>% 
-    ggplot(aes(y = reorder(country, !!var), x = !!var)) + 
+    ggplot(aes(y = reorder(country, !!var), x = !!var, fill = !!group_var)) + 
     geom_bar(stat = "identity") + 
     theme_light() +
-    theme(axis.title.y=element_blank())
+    theme(axis.title.y=element_blank(),
+          legend.justification = c(1, 0), legend.position = c(0.95, 0.05)) +
+    scale_fill_brewer(palette = "Set1", drop = T, limits = levels)
   
   if (plotly) {
-    ggplotly(g)
+    ggplotly(g) %>% 
+      layout(legend = list(x = 0.55, y = 0.05))
   } else {
     g
   }
@@ -102,6 +107,16 @@ pop_raw <- read_csv("../analysis/API_SP.POP.TOTL_DS2_en_csv_v2_887275.csv",
   select(`Country Name`, `2018`) %>% 
   rename(country = `Country Name`,
          population = `2018`)
+
+pop_meta <- 
+  read_csv(paste0("../analysis/", 
+                  "Metadata_Country_API_SP.POP.TOTL_DS2_en_csv_v2_887275.csv")
+  ) %>%
+  select(country = TableName,
+         region = Region) %>% 
+  mutate(region = as.factor(region))
+
+pop_raw <- pop_raw %>% left_join(pop_meta)
 
 time_series_covid19_confirmed_global <- 
   read_csv(paste0("../csse_covid_19_data/csse_covid_19_time_series/",
@@ -169,7 +184,7 @@ mapping <- tibble(
 
 pop <- full_join(pop_raw, mapping) %>% 
   mutate(country = ifelse(is.na(country_covid), country, country_covid)) %>% 
-  select(country, population)
+  select(country, region, population)
 
 pop$population[pop$country == "Diamond Princess"] <- 3711
 pop$population[pop$country == "MS Zaandam"] <- 1829
@@ -177,7 +192,8 @@ pop$population[pop$country == "Holy See"] <- 800
 pop$population[pop$country == "Taiwan*"] <- 23780452
 pop$population[pop$country == "Western Sahara"] <- 567402
 
-data <- left_join(data, pop)
+data <- data %>% 
+  left_join(pop)
 
 data <- data %>% 
   mutate(cases_cum_per_100k = round(cases_cum/population*100000, 3),
@@ -274,7 +290,7 @@ Column {data-width=500}
 
 
 ```{r}
-plot_data(data, latest_date, cases_cum)
+plot_data(data, latest_date, cases_cum, region)
 ```
 
 ### Total case rate per country
@@ -282,7 +298,7 @@ plot_data(data, latest_date, cases_cum)
 ```{r}
 data %>% 
   filter(cases_cum >= CASE_CUTOFF) %>% 
-  plot_data(latest_date, cases_cum_per_100k)
+  plot_data(latest_date, cases_cum_per_100k, region)
 ```
 
 
@@ -292,7 +308,7 @@ Column {data-width=500}
 ### Total new cases per country
 
 ```{r}
-plot_data(data, latest_date, cases_new)
+plot_data(data, latest_date, cases_new, region)
 ```
 
 
@@ -301,7 +317,7 @@ plot_data(data, latest_date, cases_new)
 ```{r}
 data %>% 
   filter(cases_cum >= CASE_CUTOFF) %>% 
-  plot_data(latest_date, cases_new_per_100k)
+  plot_data(latest_date, cases_new_per_100k, region)
 ```
 
 
@@ -333,7 +349,7 @@ Column {data-width=500}
 
 
 ```{r}
-plot_data(data, latest_date, deaths_cum)
+plot_data(data, latest_date, deaths_cum, region)
 ```
 
 ### Total death rate per country
@@ -341,7 +357,7 @@ plot_data(data, latest_date, deaths_cum)
 ```{r}
 data %>% 
   filter(cases_cum >= CASE_CUTOFF) %>% 
-  plot_data(latest_date, deaths_cum_per_100k)
+  plot_data(latest_date, deaths_cum_per_100k, region)
 ```
 
 
@@ -351,7 +367,7 @@ Column {data-width=500}
 ### Total new deaths per country
 
 ```{r}
-plot_data(data, latest_date, deaths_new)
+plot_data(data, latest_date, deaths_new, region)
 ```
 
 
@@ -360,7 +376,7 @@ plot_data(data, latest_date, deaths_new)
 ```{r}
 data %>% 
   filter(cases_cum >= CASE_CUTOFF) %>% 
-  plot_data(latest_date, deaths_new_per_100k)
+  plot_data(latest_date, deaths_new_per_100k, region)
 ```
 
 Total case trends
