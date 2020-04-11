@@ -76,6 +76,34 @@ plot_trend <- function(data, xvar, yvar, xvar_max = NULL, plotly = TRUE) {
   }
 }
 
+plot_map <- function(data, var, legend_title) {
+  var <- enquo(var)
+  values <- pull(data, !!var)
+  
+  l <- list(color = toRGB("grey"), width = 0.5)
+  
+  geo <- list(
+    scope = 'world',
+    showframe = FALSE,
+    showcoastlines = FALSE,
+    projection = list(type = 'robinson'),
+    lonaxis = list(range = c(-30, 55)),
+    lataxis = list(range = c(35, 70))
+  )
+
+  fig <- plot_geo(data)
+  fig <- fig %>%
+    add_trace(
+      z = values, color = values, colors = 'Reds',
+      text = ~country, locations = ~country_code, marker = list(line = l)
+    )
+  fig <- fig %>% colorbar(title = legend_title)
+  
+  map <- fig %>% layout(geo = geo)
+  
+  map
+}
+
 top_countries <- function(data, n, var) {
   var <- enquo(var)
   
@@ -177,7 +205,7 @@ mapping <- tibble(
       "Russian Federation", "St. Kitts and Nevis", "St. Lucia" , 
       "St. Vincent and the Grenadines", "Slovak Republic", 
       "Syrian Arab Republic", "Taiwan*", "United States", "Venezuela, RB",
-      "Western Sahara"),
+      "Western Sahara", "Yemen, Rep."),
   country_covid = as.character(setdiff(data$country, pop_raw$country))
 )
 
@@ -215,8 +243,46 @@ data <- data %>%
   filter(!(country %in% c("Diamond Princess", "Holy See", "MS Zaandam")))
 
 latest_date <- max(cases$date)
+
+
+data_map <- data %>% 
+  filter(date == latest_date,
+         !(country %in% c("San Marino", "Andorra", "Monaco", "Liechtenstein")))
 ```
 
+
+World maps
+=======================================================================
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Total cases per 100k
+
+```{r}
+plot_map(data_map, cases_cum_per_100k, "Total cases per 100k")
+```
+
+### New cases per 100k
+
+```{r}
+plot_map(data_map, cases_new_per_100k, "New cases per 100k")
+```
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Total deaths per 100k
+
+```{r}
+plot_map(data_map, deaths_cum_per_100k, "Total deaths per 100k")
+```
+
+### New deaths per 100k
+
+```{r}
+plot_map(data_map, deaths_new_per_100k, "New deaths per 100k")
+```
 
 Global overview
 =======================================================================
@@ -588,99 +654,4 @@ data %>%
   ungroup() %>%
   filter(country %in% top_country_range(., 11, 20, deaths_new_per_100k)) %>%
   plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_100k, MAX_DAYS)
-```
-
-
-```{r}
-# light grey boundaries
-l <- list(color = toRGB("grey"), width = 0.5)
-
-g <- list(
-  scope = 'world',
-  showframe = FALSE,
-  showcoastlines = FALSE,
-  projection = list(type = 'robinson')
-)
-
-data_map <- data %>% 
-  filter(date == latest_date,
-         !(country %in% c("San Marino", "Andorra", "Monaco", "Liechtenstein")))
-```
-
-<!-- Maps - total cases -->
-<!-- ======================================================================= -->
-
-<!-- ```{r} -->
-<!-- fig <- plot_geo(data_map) -->
-<!-- fig <- fig %>% -->
-<!--   add_trace( -->
-<!--     z = ~cases_cum, color = ~cases_cum, colors = 'Reds', -->
-<!--     text = ~country, locations = ~country_code, marker = list(line = l) -->
-<!--   ) -->
-<!-- fig <- fig %>% colorbar(title = 'Total cases') -->
-<!-- fig %>% layout(geo = g) -->
-<!-- ``` -->
-
-
-<!-- Column {data-width=500} -->
-<!-- ----------------------------------------------------------------------- -->
-
-<!-- ### Europe -->
-
-<!-- ```{r} -->
-<!-- g[["scope"]] <- 'europe' -->
-<!-- fig %>% layout(geo = g) -->
-<!-- ``` -->
-
-<!-- ### North America -->
-
-<!-- ```{r} -->
-<!-- g[["scope"]] <- 'north america' -->
-<!-- fig %>% layout(geo = g) -->
-<!-- ``` -->
-
-<!-- Column {data-width=500} -->
-<!-- ----------------------------------------------------------------------- -->
-
-<!-- ### Asia -->
-
-<!-- ```{r} -->
-<!-- # specify map projection/options -->
-<!-- g[["scope"]] <- 'asia' -->
-<!-- fig %>% layout(geo = g) -->
-<!-- ``` -->
-
-<!-- ### South America -->
-
-<!-- ```{r} -->
-<!-- g[["scope"]] <- 'south america' -->
-<!-- fig %>% layout(geo = g) -->
-<!-- ``` -->
-
-<!-- Column {data-width=500} -->
-<!-- ----------------------------------------------------------------------- -->
-
-<!-- ### Africa -->
-
-<!-- ```{r} -->
-<!-- # specify map projection/options -->
-<!-- g[["scope"]] <- 'africa' -->
-<!-- fig %>% layout(geo = g) -->
-<!-- ``` -->
-
-<!-- ### Empty -->
-
-Map - case rates
-=======================================================================
-
-```{r}
-fig <- plot_geo(data_map)
-fig <- fig %>%
-  add_trace(
-    z = ~cases_cum_per_100k, color = ~cases_cum_per_100k, colors = 'Reds',
-    text = ~country, locations = ~country_code, marker = list(line = l)
-  )
-fig <- fig %>% colorbar(title = 'Cases per 100k')
-
-fig %>% layout(geo = g)
 ```
