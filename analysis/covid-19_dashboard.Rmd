@@ -363,7 +363,7 @@ Column {data-width=500}
 plot_data(data, latest_date, cases_cum, region)
 ```
 
-### Total case rate per country
+### Total cases per capita per country
 
 ```{r}
 data %>%
@@ -382,7 +382,7 @@ plot_data(data, latest_date, cases_new, region)
 ```
 
 
-### Total new case rate per country
+### Total new cases per capita per country
 
 ```{r}
 data %>%
@@ -422,7 +422,7 @@ Column {data-width=500}
 plot_data(data, latest_date, deaths_cum, region)
 ```
 
-### Total death rate per country
+### Total deaths per capita per country
 
 ```{r}
 data %>%
@@ -441,7 +441,7 @@ plot_data(data, latest_date, deaths_new, region)
 ```
 
 
-### Total new death rate per country
+### Total new deaths per capita per country
 
 ```{r}
 data %>%
@@ -477,9 +477,9 @@ data %>%
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Case rate trend for top 25 countries
+### Case per capita trend for top 25 countries
 
-Top 25 countries according to new case rate on `r latest_date`, countries with min. `r CASE_CUTOFF` cases.
+Top 25 countries according to new cases per capita on `r latest_date`, countries with min. `r CASE_CUTOFF` cases.
 
 ```{r}
 data %>%
@@ -529,9 +529,9 @@ data %>%
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### New case rate trend for top 25 countries
+### New cases per capita trend for top 25 countries
 
-Top 25 countries according to new case rate on `r latest_date`, countries with min. `r CASE_CUTOFF` cases.
+Top 25 countries according to new cases per capita on `r latest_date`, countries with min. `r CASE_CUTOFF` cases.
 
 ```{r}
 data %>%
@@ -581,9 +581,9 @@ data %>%
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Death rate trend for top 25 countries
+### Deaths per capita trend for top 25 countries
 
-Top 25 countries according to new death rate on `r latest_date`, countries with min. `r DEATH_CUTOFF` deaths.
+Top 25 countries according to new deaths per capita on `r latest_date`, countries with min. `r DEATH_CUTOFF` deaths.
 
 ```{r}
 data %>%
@@ -633,9 +633,9 @@ data %>%
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### New death rate trend for top 25 countries
+### New deaths per capita trend for top 25 countries
 
-Top 25 countries according to new death rate on `r latest_date`, countries with min. `r DEATH_CUTOFF` deaths.
+Top 25 countries according to new deaths per capita on `r latest_date`, countries with min. `r DEATH_CUTOFF` deaths.
 
 ```{r}
 data %>%
