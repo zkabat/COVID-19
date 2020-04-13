@@ -35,7 +35,7 @@ SMOOTH_WINDOW <- 7
 
 # Load functions
 
-plot_data <- function(data, date, var, group_var = NULL, n = 20, plotly = TRUE) {
+plot_data <- function(data, date, var, group_var = NULL, n = 20, plotly = T) {
   date_ <- date
   var <- enquo(var)
   group_var <- enquo(group_var)
@@ -81,7 +81,10 @@ plot_map <- function(data, var, legend_title) {
   var <- enquo(var)
   values <- pull(data, !!var)
   
-  l <- list(color = toRGB("grey"), width = 0.5)
+  l <- list(
+    color = toRGB("grey"), 
+    width = 0.5
+  )
   
   geo <- list(
     scope = 'world',
@@ -91,16 +94,14 @@ plot_map <- function(data, var, legend_title) {
     lonaxis = list(range = c(-30, 55)),
     lataxis = list(range = c(35, 70))
   )
-
-  fig <- plot_geo(data)
-  fig <- fig %>%
+  
+  map <- plot_geo(data) %>%
     add_trace(
       z = values, color = values, colors = 'Reds',
       text = ~country, locations = ~country_code, marker = list(line = l)
-    )
-  fig <- fig %>% colorbar(title = legend_title)
-  
-  map <- fig %>% layout(geo = geo)
+    ) %>% 
+    colorbar(title = legend_title) %>% 
+    layout(geo = geo)
   
   map
 }
@@ -168,7 +169,7 @@ cases <- time_series_covid19_confirmed_global %>%
   mutate(cases_new = cases_cum - dplyr::lag(cases_cum),
          cases_new_smooth = zoo::rollapply(cases_new, SMOOTH_WINDOW, mean, 
                                            align = "center", fill = NA),
-         cases_growth_rate_pct = round(cases_new/lag(cases_cum)*100, 1)) %>% 
+         cases_growth_rate_pct = round(cases_new / lag(cases_cum) * 100, 1)) %>% 
   ungroup()
 
 deaths <- time_series_covid19_deaths_global %>% 
@@ -183,7 +184,8 @@ deaths <- time_series_covid19_deaths_global %>%
   mutate(deaths_new = deaths_cum - dplyr::lag(deaths_cum),
          deaths_new_smooth = zoo::rollapply(deaths_new, SMOOTH_WINDOW, mean, 
                                             align = "center", fill = NA),
-         deaths_growth_rate_pct = round(deaths_new/lag(deaths_cum)*100, 1)) %>% 
+         deaths_growth_rate_pct = round(deaths_new / lag(deaths_cum) * 100, 1)
+  ) %>% 
   ungroup()
 
 data <- full_join(cases, deaths)
@@ -226,10 +228,12 @@ data <- data %>%
 data <- data %>% 
   mutate(cases_cum_per_100k = round(cases_cum/population*100000, 3),
          cases_new_per_100k = round(cases_new/population*100000, 3),
-         cases_new_smooth_per_100k = round(cases_new_smooth/population*100000, 3),
+         cases_new_smooth_per_100k = 
+           round(cases_new_smooth/population*100000, 3),
          deaths_cum_per_100k = round(deaths_cum/population*100000, 6),
          deaths_new_per_100k = round(deaths_new/population*100000, 6),
-         deaths_new_smooth_per_100k = round(deaths_new_smooth/population*100000, 6))
+         deaths_new_smooth_per_100k = 
+           round(deaths_new_smooth/population*100000, 6))
 
 data <- data %>% 
   group_by(country) %>% 
