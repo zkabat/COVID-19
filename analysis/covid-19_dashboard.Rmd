@@ -155,6 +155,10 @@ time_series_covid19_deaths_global <-
   read_csv(paste0("../csse_covid_19_data/csse_covid_19_time_series/",
                   "time_series_covid19_deaths_global.csv"))
 
+time_series_covid19_recovered_global <- 
+  read_csv(paste0("../csse_covid_19_data/csse_covid_19_time_series/",
+                  "time_series_covid19_recovered_global.csv"))
+
 # Prepare data
 
 cases <- time_series_covid19_confirmed_global %>% 
@@ -188,7 +192,27 @@ deaths <- time_series_covid19_deaths_global %>%
   ) %>% 
   ungroup()
 
-data <- full_join(cases, deaths)
+recovered <- time_series_covid19_recovered_global %>% 
+  select(-`Province/State`, -Lat, -Long) %>% 
+  pivot_longer(-`Country/Region`, 
+               names_to = "date", values_to = "recovered_cum") %>% 
+  rename(country = `Country/Region`) %>% 
+  mutate(date = mdy(date)) %>% 
+  arrange(country, date) %>% 
+  group_by(country, date) %>% 
+  summarize(recovered_cum = sum(recovered_cum)) %>% 
+  mutate(recovered_new = recovered_cum - dplyr::lag(recovered_cum),
+         recovered_new_smooth = 
+           zoo::rollapply(recovered_new, SMOOTH_WINDOW, mean, 
+                          align = "center", fill = NA),
+         recovered_growth_rate_pct = 
+           round(recovered_new / lag(recovered_cum) * 100, 1)
+  ) %>% 
+  ungroup()
+
+data <- cases %>% 
+  full_join(deaths) %>% 
+  full_join(recovered)
 
 data <- data %>%
   group_by(country) %>% 
@@ -233,7 +257,11 @@ data <- data %>%
          deaths_cum_per_100k = round(deaths_cum/population*100000, 6),
          deaths_new_per_100k = round(deaths_new/population*100000, 6),
          deaths_new_smooth_per_100k = 
-           round(deaths_new_smooth/population*100000, 6))
+           round(deaths_new_smooth/population*100000, 6),
+         recovered_cum_per_100k = round(recovered_cum/population*100000, 6),
+         recovered_new_per_100k = round(recovered_new/population*100000, 6),
+         recovered_new_smooth_per_100k = 
+           round(recovered_new_smooth/population*100000, 6))
 
 data <- data %>% 
   group_by(country) %>% 
