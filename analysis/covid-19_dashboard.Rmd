@@ -277,6 +277,11 @@ data <- data %>%
 
 latest_date <- max(cases$date)
 
+data_sum <- data %>%
+  select(date, cases_cum, cases_new, deaths_cum, deaths_new,
+         recovered_cum, recovered_new) %>%
+  group_by(date) %>%
+  summarize_all(.funs = sum, na.rm = TRUE)
 
 data_map <- data %>% 
   filter(date == latest_date,
@@ -320,26 +325,22 @@ plot_map(data_map, deaths_new_per_100k, "New deaths per 100k")
 Global overview
 =======================================================================
 
-Column {data-width=500}
+Column {data-width=600}
 -----------------------------------------------------------------------
 
 ### Global cases and deaths
 
 ```{r}
-data_sum <- data %>%
-  select(date, cases_cum, cases_new, deaths_cum, deaths_new) %>%
-  group_by(date) %>%
-  summarize_all(.funs = sum, na.rm = TRUE)
-
 data_sum %>%
   arrange(desc(date)) %>%
   datatable(colnames = c("Date", "Total cases", "New cases",
-                         "Total deaths", "New deaths"),
+                         "Total deaths", "New deaths", 
+                         "Total recovered", "New recovered"),
             rownames = FALSE,
             options = list(pageLength = 20))
 ```
 
-Column {data-width=500}
+Column {data-width=400}
 -----------------------------------------------------------------------
 
 ### Global new cases
@@ -359,6 +360,17 @@ ggplotly(g)
 g <- data_sum %>%
   filter(date >= dmy("01-03-2020")) %>%
   ggplot(aes(x = date, y = deaths_new)) +
+  geom_point(color = "navy") + geom_smooth()
+
+ggplotly(g)
+```
+
+### Global new recovered
+
+```{r}
+g <- data_sum %>%
+  filter(date >= dmy("01-03-2020")) %>%
+  ggplot(aes(x = date, y = recovered_new)) +
   geom_point(color = "navy") + geom_smooth()
 
 ggplotly(g)
@@ -479,6 +491,64 @@ plot_data(data, latest_date, deaths_new, region)
 data %>%
   filter(cases_cum >= CASE_CUTOFF) %>%
   plot_data(latest_date, deaths_new_per_100k, region)
+```
+
+Recovery overview
+=======================================================================
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Recovered last day
+
+```{r}
+data %>%
+  filter(date == latest_date) %>%
+  select(country, recovered_cum, recovered_new,
+         recovered_cum_per_100k, recovered_new_per_100k) %>%
+  arrange(desc(recovered_new)) %>%
+  datatable(colnames = c("Country", "Total recovered", "New recovered",
+                         "Total recovered per 100k", "New recovered per 100k"),
+            rownames = FALSE,
+            options = list(pageLength = 15))
+```
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Total recovered per country
+
+
+```{r}
+plot_data(data, latest_date, recovered_cum, region)
+```
+
+### Total recovered per capita per country
+
+```{r}
+data %>%
+  filter(cases_cum >= CASE_CUTOFF) %>%
+  plot_data(latest_date, recovered_cum_per_100k, region)
+```
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Total new recovered per country
+
+```{r}
+plot_data(data, latest_date, recovered_new, region)
+```
+
+
+### Total new recovered per capita per country
+
+```{r}
+data %>%
+  filter(cases_cum >= CASE_CUTOFF) %>%
+  plot_data(latest_date, recovered_new_per_100k, region)
 ```
 
 Total case trends
