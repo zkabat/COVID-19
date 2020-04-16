@@ -25,8 +25,8 @@ library(DT)
 LIMIT_CASE <- 100
 LIMIT_DEATH <- 10
 
-LIMIT_CASE_RATE <- 1
-LIMIT_DEATH_RATE <- 0.1
+LIMIT_CASE_RATE <- 10
+LIMIT_DEATH_RATE <- 1
 
 CASE_CUTOFF <- 1000
 DEATH_CUTOFF <- 50
@@ -250,24 +250,24 @@ data <- data %>%
   left_join(pop)
 
 data <- data %>% 
-  mutate(cases_cum_per_100k = round(cases_cum/population*100000, 3),
-         cases_new_per_100k = round(cases_new/population*100000, 3),
-         cases_new_smooth_per_100k = 
-           round(cases_new_smooth/population*100000, 3),
-         deaths_cum_per_100k = round(deaths_cum/population*100000, 6),
-         deaths_new_per_100k = round(deaths_new/population*100000, 6),
-         deaths_new_smooth_per_100k = 
-           round(deaths_new_smooth/population*100000, 6),
-         recovered_cum_per_100k = round(recovered_cum/population*100000, 6),
-         recovered_new_per_100k = round(recovered_new/population*100000, 6),
-         recovered_new_smooth_per_100k = 
-           round(recovered_new_smooth/population*100000, 6))
+  mutate(cases_cum_per_mil = round(cases_cum/population*1000000, 3),
+         cases_new_per_mil = round(cases_new/population*1000000, 3),
+         cases_new_smooth_per_mil = 
+           round(cases_new_smooth/population*1000000, 3),
+         deaths_cum_per_mil = round(deaths_cum/population*1000000, 6),
+         deaths_new_per_mil = round(deaths_new/population*1000000, 6),
+         deaths_new_smooth_per_mil = 
+           round(deaths_new_smooth/population*1000000, 6),
+         recovered_cum_per_mil = round(recovered_cum/population*1000000, 6),
+         recovered_new_per_mil = round(recovered_new/population*1000000, 6),
+         recovered_new_smooth_per_mil = 
+           round(recovered_new_smooth/population*1000000, 6))
 
 data <- data %>% 
   group_by(country) %>% 
-  mutate(case_rate_ind = ifelse(cases_cum_per_100k >= LIMIT_CASE_RATE, 1, 0),
+  mutate(case_rate_ind = ifelse(cases_cum_per_mil >= LIMIT_CASE_RATE, 1, 0),
          days_since_limit_case_rate = cumsum(case_rate_ind),
-         death_rate_ind = ifelse(deaths_cum_per_100k >= LIMIT_DEATH_RATE, 1, 0),
+         death_rate_ind = ifelse(deaths_cum_per_mil >= LIMIT_DEATH_RATE, 1, 0),
          days_since_limit_death_rate = cumsum(death_rate_ind)) %>% 
   ungroup() %>% 
   select(-case_rate_ind, -death_rate_ind)
@@ -295,31 +295,31 @@ World maps
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Total cases per 100k
+### Total cases per mil
 
 ```{r}
-plot_map(data_map, cases_cum_per_100k, "Total cases per 100k")
+plot_map(data_map, cases_cum_per_mil, "Total cases per mil")
 ```
 
-### New cases per 100k
+### New cases per mil
 
 ```{r}
-plot_map(data_map, cases_new_per_100k, "New cases per 100k")
+plot_map(data_map, cases_new_per_mil, "New cases per mil")
 ```
 
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Total deaths per 100k
+### Total deaths per mil
 
 ```{r}
-plot_map(data_map, deaths_cum_per_100k, "Total deaths per 100k")
+plot_map(data_map, deaths_cum_per_mil, "Total deaths per mil")
 ```
 
-### New deaths per 100k
+### New deaths per mil
 
 ```{r}
-plot_map(data_map, deaths_new_per_100k, "New deaths per 100k")
+plot_map(data_map, deaths_new_per_mil, "New deaths per mil")
 ```
 
 Global overview
@@ -388,10 +388,10 @@ Column {data-width=500}
 data %>%
   filter(date == latest_date) %>%
   select(country, cases_cum, cases_new,
-         cases_cum_per_100k, cases_new_per_100k) %>%
+         cases_cum_per_mil, cases_new_per_mil) %>%
   arrange(desc(cases_new)) %>%
   datatable(colnames = c("Country", "Total cases", "New cases",
-                         "Total cases per 100k", "New cases per 100k"),
+                         "Total cases per mil", "New cases per mil"),
             rownames = FALSE,
             options = list(pageLength = 15))
 ```
@@ -412,7 +412,7 @@ plot_data(data, latest_date, cases_cum, region)
 ```{r}
 data %>%
   filter(cases_cum >= CASE_CUTOFF) %>%
-  plot_data(latest_date, cases_cum_per_100k, region)
+  plot_data(latest_date, cases_cum_per_mil, region)
 ```
 
 
@@ -431,7 +431,7 @@ plot_data(data, latest_date, cases_new, region)
 ```{r}
 data %>%
   filter(cases_cum >= CASE_CUTOFF) %>%
-  plot_data(latest_date, cases_new_per_100k, region)
+  plot_data(latest_date, cases_new_per_mil, region)
 ```
 
 
@@ -447,10 +447,10 @@ Column {data-width=500}
 data %>%
   filter(date == latest_date) %>%
   select(country, deaths_cum, deaths_new,
-         deaths_cum_per_100k, deaths_new_per_100k) %>%
+         deaths_cum_per_mil, deaths_new_per_mil) %>%
   arrange(desc(deaths_new)) %>%
   datatable(colnames = c("Country", "Total deaths", "New deaths",
-                         "Total deaths per 100k", "New deaths per 100k"),
+                         "Total deaths per mil", "New deaths per mil"),
             rownames = FALSE,
             options = list(pageLength = 15))
 ```
@@ -471,7 +471,7 @@ plot_data(data, latest_date, deaths_cum, region)
 ```{r}
 data %>%
   filter(cases_cum >= CASE_CUTOFF) %>%
-  plot_data(latest_date, deaths_cum_per_100k, region)
+  plot_data(latest_date, deaths_cum_per_mil, region)
 ```
 
 
@@ -490,7 +490,7 @@ plot_data(data, latest_date, deaths_new, region)
 ```{r}
 data %>%
   filter(cases_cum >= CASE_CUTOFF) %>%
-  plot_data(latest_date, deaths_new_per_100k, region)
+  plot_data(latest_date, deaths_new_per_mil, region)
 ```
 
 Recovery overview
@@ -505,10 +505,10 @@ Column {data-width=500}
 data %>%
   filter(date == latest_date) %>%
   select(country, recovered_cum, recovered_new,
-         recovered_cum_per_100k, recovered_new_per_100k) %>%
+         recovered_cum_per_mil, recovered_new_per_mil) %>%
   arrange(desc(recovered_new)) %>%
   datatable(colnames = c("Country", "Total recovered", "New recovered",
-                         "Total recovered per 100k", "New recovered per 100k"),
+                         "Total recovered per mil", "New recovered per mil"),
             rownames = FALSE,
             options = list(pageLength = 15))
 ```
@@ -529,7 +529,7 @@ plot_data(data, latest_date, recovered_cum, region)
 ```{r}
 data %>%
   filter(cases_cum >= CASE_CUTOFF) %>%
-  plot_data(latest_date, recovered_cum_per_100k, region)
+  plot_data(latest_date, recovered_cum_per_mil, region)
 ```
 
 
@@ -548,7 +548,7 @@ plot_data(data, latest_date, recovered_new, region)
 ```{r}
 data %>%
   filter(cases_cum >= CASE_CUTOFF) %>%
-  plot_data(latest_date, recovered_new_per_100k, region)
+  plot_data(latest_date, recovered_new_per_mil, region)
 ```
 
 Total case trends
@@ -588,8 +588,8 @@ data %>%
   group_by(country) %>%
   filter(max(cases_cum) >= CASE_CUTOFF) %>%
   ungroup() %>%
-  filter(country %in% top_country_range(., 1, 25, cases_new_per_100k)) %>%
-  plot_trend(days_since_limit_case_rate, cases_cum_per_100k, MAX_DAYS)
+  filter(country %in% top_country_range(., 1, 25, cases_new_per_mil)) %>%
+  plot_trend(days_since_limit_case_rate, cases_cum_per_mil, MAX_DAYS)
 ```
 
 <!-- ### Case rate trend for top 11-20 countries -->
@@ -599,8 +599,8 @@ data %>%
 <!--   group_by(country) %>% -->
 <!--   filter(max(cases_cum) >= CASE_CUTOFF) %>% -->
 <!--   ungroup() %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, cases_new_per_100k)) %>% -->
-<!--   plot_trend(days_since_limit_case_rate, cases_cum_per_100k, MAX_DAYS) -->
+<!--   filter(country %in% top_country_range(., 11, 20, cases_new_per_mil)) %>% -->
+<!--   plot_trend(days_since_limit_case_rate, cases_cum_per_mil, MAX_DAYS) -->
 <!-- ``` -->
 
 New case trends
@@ -640,8 +640,8 @@ data %>%
   group_by(country) %>%
   filter(max(cases_cum) >= CASE_CUTOFF) %>%
   ungroup() %>%
-  filter(country %in% top_country_range(., 1, 25, cases_new_per_100k)) %>%
-  plot_trend(days_since_limit_case_rate, cases_new_smooth_per_100k, MAX_DAYS)
+  filter(country %in% top_country_range(., 1, 25, cases_new_per_mil)) %>%
+  plot_trend(days_since_limit_case_rate, cases_new_smooth_per_mil, MAX_DAYS)
 ```
 
 <!-- ### New case rate trend for top 11-20 countries -->
@@ -651,8 +651,8 @@ data %>%
 <!--   group_by(country) %>% -->
 <!--   filter(max(cases_cum) >= CASE_CUTOFF) %>% -->
 <!--   ungroup() %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, cases_new_per_100k)) %>% -->
-<!--   plot_trend(days_since_limit_case_rate, cases_new_smooth_per_100k, MAX_DAYS) -->
+<!--   filter(country %in% top_country_range(., 11, 20, cases_new_per_mil)) %>% -->
+<!--   plot_trend(days_since_limit_case_rate, cases_new_smooth_per_mil, MAX_DAYS) -->
 <!-- ``` -->
 
 Total death trends
@@ -692,8 +692,8 @@ data %>%
   group_by(country) %>%
   filter(max(deaths_cum) >= DEATH_CUTOFF) %>%
   ungroup() %>%
-  filter(country %in% top_country_range(., 1, 25, deaths_new_per_100k)) %>%
-  plot_trend(days_since_limit_death_rate, deaths_cum_per_100k, MAX_DAYS)
+  filter(country %in% top_country_range(., 1, 25, deaths_new_per_mil)) %>%
+  plot_trend(days_since_limit_death_rate, deaths_cum_per_mil, MAX_DAYS)
 ```
 
 <!-- ### Death rate trend for top 11-20 countries -->
@@ -703,8 +703,8 @@ data %>%
 <!--   group_by(country) %>% -->
 <!--   filter(max(deaths_cum) >= DEATH_CUTOFF) %>% -->
 <!--   ungroup() %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, deaths_new_per_100k)) %>% -->
-<!--   plot_trend(days_since_limit_death_rate, deaths_cum_per_100k, MAX_DAYS) -->
+<!--   filter(country %in% top_country_range(., 11, 20, deaths_new_per_mil)) %>% -->
+<!--   plot_trend(days_since_limit_death_rate, deaths_cum_per_mil, MAX_DAYS) -->
 <!-- ``` -->
 
 New death trends
@@ -744,8 +744,8 @@ data %>%
   group_by(country) %>%
   filter(max(deaths_cum) >= DEATH_CUTOFF) %>%
   ungroup() %>%
-  filter(country %in% top_country_range(., 1, 25, deaths_new_per_100k)) %>%
-  plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_100k, MAX_DAYS)
+  filter(country %in% top_country_range(., 1, 25, deaths_new_per_mil)) %>%
+  plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_mil, MAX_DAYS)
 ```
 
 <!-- ### New death rate trend for top 11-20 countries -->
@@ -755,6 +755,6 @@ data %>%
 <!--   group_by(country) %>% -->
 <!--   filter(max(deaths_cum) >= DEATH_CUTOFF) %>% -->
 <!--   ungroup() %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, deaths_new_per_100k)) %>% -->
-<!--   plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_100k, MAX_DAYS) -->
+<!--   filter(country %in% top_country_range(., 11, 20, deaths_new_per_mil)) %>% -->
+<!--   plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_mil, MAX_DAYS) -->
 <!-- ``` -->
