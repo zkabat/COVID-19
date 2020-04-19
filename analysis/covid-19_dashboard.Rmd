@@ -46,6 +46,7 @@ plot_data <- function(data, date, var, group_var = NULL, n = 20, plotly = T) {
   g <- data %>% 
     filter(date == date_) %>% 
     top_n(n, !!var) %>% 
+    slice(1:n) %>% # guarantee of the row cutoff
     ggplot(aes(y = reorder(country, !!var), x = !!var, fill = !!group_var)) + 
     geom_bar(stat = "identity") + 
     theme_light() +
@@ -253,18 +254,18 @@ data <- data %>%
   left_join(pop)
 
 data <- data %>% 
-  mutate(cases_cum_per_mil = round(cases_cum/population*1000000, 3),
-         cases_new_per_mil = round(cases_new/population*1000000, 3),
+  mutate(cases_cum_per_mil = round(cases_cum/population*1000000, 0),
+         cases_new_per_mil = round(cases_new/population*1000000, 0),
          cases_new_smooth_per_mil = 
-           round(cases_new_smooth/population*1000000, 3),
-         deaths_cum_per_mil = round(deaths_cum/population*1000000, 6),
-         deaths_new_per_mil = round(deaths_new/population*1000000, 6),
+           round(cases_new_smooth/population*1000000, 0),
+         deaths_cum_per_mil = round(deaths_cum/population*1000000, 0),
+         deaths_new_per_mil = round(deaths_new/population*1000000, 0),
          deaths_new_smooth_per_mil = 
-           round(deaths_new_smooth/population*1000000, 6),
-         recovered_cum_per_mil = round(recovered_cum/population*1000000, 6),
-         recovered_new_per_mil = round(recovered_new/population*1000000, 6),
+           round(deaths_new_smooth/population*1000000, 0),
+         recovered_cum_per_mil = round(recovered_cum/population*1000000, 0),
+         recovered_new_per_mil = round(recovered_new/population*1000000, 0),
          recovered_new_smooth_per_mil = 
-           round(recovered_new_smooth/population*1000000, 6))
+           round(recovered_new_smooth/population*1000000, 0))
 
 data <- data %>% 
   group_by(country) %>% 
@@ -292,38 +293,38 @@ data_map <- data %>%
 ```
 
 
-World maps
-=======================================================================
+<!-- World maps -->
+<!-- ======================================================================= -->
 
-Column {data-width=500}
------------------------------------------------------------------------
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
 
-### Total cases per mil
+<!-- ### Total cases per mil -->
 
-```{r}
-plot_map(data_map, cases_cum_per_mil, "Total cases per mil")
-```
+<!-- ```{r} -->
+<!-- plot_map(data_map, cases_cum_per_mil, "Total cases per mil") -->
+<!-- ``` -->
 
-### New cases per mil
+<!-- ### New cases per mil -->
 
-```{r}
-plot_map(data_map, cases_new_per_mil, "New cases per mil")
-```
+<!-- ```{r} -->
+<!-- plot_map(data_map, cases_new_per_mil, "New cases per mil") -->
+<!-- ``` -->
 
-Column {data-width=500}
------------------------------------------------------------------------
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
 
-### Total deaths per mil
+<!-- ### Total deaths per mil -->
 
-```{r}
-plot_map(data_map, deaths_cum_per_mil, "Total deaths per mil")
-```
+<!-- ```{r} -->
+<!-- plot_map(data_map, deaths_cum_per_mil, "Total deaths per mil") -->
+<!-- ``` -->
 
-### New deaths per mil
+<!-- ### New deaths per mil -->
 
-```{r}
-plot_map(data_map, deaths_new_per_mil, "New deaths per mil")
-```
+<!-- ```{r} -->
+<!-- plot_map(data_map, deaths_new_per_mil, "New deaths per mil") -->
+<!-- ``` -->
 
 Global overview
 =======================================================================
@@ -379,7 +380,7 @@ g <- data_sum %>%
 ggplotly(g)
 ```
 
-Case overview
+Daily overview
 =======================================================================
 
 Column {.sidebar}
@@ -393,6 +394,12 @@ selectInput("metric", label = "Select metric:",
 
 selectInput("region", label = "Select region:", 
             choices = c("All", region_opts), selected = "All")
+
+sliderInput("nbars", label = "Countries to plot:",
+            min = 5, max = 30, value = 20, step = 5)
+
+sliderInput("cutoff", label = "Select case lower bound:",
+            min = 0, max = 1000, value = 1000, step = 100)
 ```
 
 
@@ -403,11 +410,13 @@ Column {data-width=500}
 
 ```{r}
 data_last <- reactive({
-  if (input$region == "All") {
+  tmp <- if (input$region == "All") {
     data
   } else {
     data %>% filter(region == input$region)
   }
+  
+  filter(tmp, cases_cum >= input$cutoff)
 })
 ```
 
@@ -458,11 +467,11 @@ Column {data-width=500}
 ```{r}
 renderPlotly({
   if (input$metric == "Cases") {
-    plot_data(data_last(), latest_date, cases_cum, region)
+    plot_data(data_last(), latest_date, cases_cum, region, input$nbars)
   } else if (input$metric == "Deaths") {
-    plot_data(data_last(), latest_date, deaths_cum, region)
+    plot_data(data_last(), latest_date, deaths_cum, region, input$nbars)
   } else if (input$metric == "Recovered"){
-    plot_data(data_last(), latest_date, recovered_cum, region)
+    plot_data(data_last(), latest_date, recovered_cum, region, input$nbars)
   }
 })
 ```
@@ -471,15 +480,13 @@ renderPlotly({
 
 ```{r}
 renderPlotly({
-  data_here <- data_last() %>%
-      filter(cases_cum >= CASE_CUTOFF)
-  
   if (input$metric == "Cases") {
-    plot_data(data_here, latest_date, cases_cum_per_mil, region)
+    plot_data(data_last(), latest_date, cases_cum_per_mil, region, input$nbars)
   } else if (input$metric == "Deaths") {
-    plot_data(data_here, latest_date, deaths_cum_per_mil, region)
+    plot_data(data_last(), latest_date, deaths_cum_per_mil, region, input$nbars)
   } else if (input$metric == "Recovered") {
-    plot_data(data_here, latest_date, recovered_cum_per_mil, region) 
+    plot_data(data_last(), latest_date, recovered_cum_per_mil, region, 
+              input$nbars) 
   }
 })
 ```
@@ -493,11 +500,11 @@ Column {data-width=500}
 ```{r}
 renderPlotly({
   if (input$metric == "Cases") {
-    plot_data(data_last(), latest_date, cases_new, region)
+    plot_data(data_last(), latest_date, cases_new, region, input$nbars)
   } else if (input$metric == "Deaths") {
-    plot_data(data_last(), latest_date, deaths_new, region)
+    plot_data(data_last(), latest_date, deaths_new, region, input$nbars)
   } else if (input$metric == "Recovered"){
-    plot_data(data_last(), latest_date, recovered_new, region)
+    plot_data(data_last(), latest_date, recovered_new, region, input$nbars)
   }
 })
 ```
@@ -507,15 +514,13 @@ renderPlotly({
 
 ```{r}
 renderPlotly({
-  data_here <- data_last() %>%
-      filter(cases_cum >= CASE_CUTOFF)
-  
   if (input$metric == "Cases") {
-    plot_data(data_here, latest_date, cases_new_per_mil, region)
+    plot_data(data_last(), latest_date, cases_new_per_mil, region, input$nbars)
   } else if (input$metric == "Deaths") {
-    plot_data(data_here, latest_date, deaths_new_per_mil, region)
+    plot_data(data_last(), latest_date, deaths_new_per_mil, region, input$nbars)
   } else if (input$metric == "Recovered") {
-    plot_data(data_here, latest_date, recovered_new_per_mil, region) 
+    plot_data(data_last(), latest_date, recovered_new_per_mil, region, 
+              input$nbars) 
   }
 })
 ```
