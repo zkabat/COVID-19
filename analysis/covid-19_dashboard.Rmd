@@ -405,12 +405,6 @@ sliderInput("cutoff", label = "Select case lower bound:",
             min = 0, max = 1000, value = 1000, step = 100)
 ```
 
-
-Column {data-width=500}
------------------------------------------------------------------------
-
-### Table overview
-
 ```{r}
 data_last <- reactive({
   tmp <- if (input$region == "All") {
@@ -423,6 +417,10 @@ data_last <- reactive({
 })
 ```
 
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Table overview
 
 ```{r}
 renderDT({
@@ -535,210 +533,313 @@ renderPlotly({
 ```
 
 
-Total case trends
+
+
+
+
+
+
+Trends
 =======================================================================
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+selectInput("metric2", label = "Select metric:",
+            choices = c("Total cases", "New cases",
+                        "Total deaths", "New deaths"), 
+            selected = "Total cases")
+
+selectInput("region2", label = "Select region:", 
+            choices = c("All", region_opts), selected = "All")
+
+sliderInput("cutoff2", label = "Select case lower bound:",
+            min = 0, max = 1000, value = 1000, step = 100)
+```
+
+
+```{r}
+data_trend <- reactive({
+  tmp <- if (input$region2 == "All") {
+    data
+  } else {
+    data %>% filter(region == input$region2)
+  }
+  
+  tmp %>%
+    group_by(country) %>%
+    filter(max(cases_cum) >= input$cutoff2) %>%
+    ungroup()
+})
+```
 
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Case trend for top 25 countries
+### Trend for top 25 countries
 
 Top 25 countries according to new cases on `r latest_date`.
 
 ```{r}
-data %>%
-  filter(country %in% top_country_range(., 1, 25, cases_new)) %>%
-  plot_trend(days_since_limit_case, cases_cum, MAX_DAYS)
+renderPlotly({
+  if (input$metric2 == "Total cases") {
+    data_trend() %>%
+      filter(country %in% top_country_range(., 1, 25, cases_new)) %>%
+      plot_trend(days_since_limit_case, cases_cum, MAX_DAYS)
+  } else if (input$metric2 == "New cases") {
+    data_trend() %>%
+      filter(country %in% top_country_range(., 1, 25, cases_new)) %>%
+      plot_trend(days_since_limit_case, cases_new_smooth, MAX_DAYS)
+  } else if (input$metric2 == "Total deaths") {
+    data_trend() %>%
+      filter(country %in% top_country_range(., 1, 25, deaths_new)) %>%
+      plot_trend(days_since_limit_death, deaths_cum, MAX_DAYS)
+  } else if (input$metric2 == "New deaths") {
+    data_trend() %>%
+      filter(country %in% top_country_range(., 1, 25, deaths_new)) %>%
+      plot_trend(days_since_limit_death, deaths_new_smooth, MAX_DAYS)
+  }
+})
 ```
 
-<!-- ### Case trend for top 11-20 countries -->
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Trend per million for top 25 countries
+
+Top 25 countries according to new cases per capita on `r latest_date`, countries with min. `r CASE_CUTOFF` cases.
+
+```{r}
+renderPlotly({
+  if (input$metric2 == "Total cases") {
+    data_trend() %>%
+      filter(country %in% top_country_range(., 1, 25, cases_new_per_mil)) %>%
+      plot_trend(days_since_limit_case_rate, cases_cum_per_mil, MAX_DAYS)
+  } else if (input$metric2 == "New cases") {
+    data_trend() %>%
+      filter(country %in% top_country_range(., 1, 25, cases_new_per_mil)) %>%
+      plot_trend(days_since_limit_case_rate, cases_new_smooth_per_mil, MAX_DAYS)
+  } else if (input$metric2 == "Total deaths") {
+    data_trend() %>%
+      filter(country %in% top_country_range(., 1, 25, deaths_new_per_mil)) %>%
+      plot_trend(days_since_limit_death_rate, deaths_cum_per_mil, MAX_DAYS)
+  } else if (input$metric2 == "New deaths") {
+    data_trend() %>%
+      filter(country %in% top_country_range(., 1, 25, deaths_new_per_mil)) %>%
+      plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_mil, MAX_DAYS)
+  }
+})
+```
+
+
+
+
+
+<!-- Total case trends -->
+<!-- ======================================================================= -->
+
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
+
+<!-- ### Case trend for top 25 countries -->
+
+<!-- Top 25 countries according to new cases on `r latest_date`. -->
 
 <!-- ```{r} -->
 <!-- data %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, cases_new)) %>% -->
+<!--   filter(country %in% top_country_range(., 1, 25, cases_new)) %>% -->
 <!--   plot_trend(days_since_limit_case, cases_cum, MAX_DAYS) -->
 <!-- ``` -->
 
+<!-- <!-- ### Case trend for top 11-20 countries --> -->
 
-Column {data-width=500}
------------------------------------------------------------------------
+<!-- <!-- ```{r} --> -->
+<!-- <!-- data %>% --> -->
+<!-- <!--   filter(country %in% top_country_range(., 11, 20, cases_new)) %>% --> -->
+<!-- <!--   plot_trend(days_since_limit_case, cases_cum, MAX_DAYS) --> -->
+<!-- <!-- ``` --> -->
 
-### Case per capita trend for top 25 countries
 
-Top 25 countries according to new cases per capita on `r latest_date`, countries with min. `r CASE_CUTOFF` cases.
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
 
-```{r}
-data %>%
-  group_by(country) %>%
-  filter(max(cases_cum) >= CASE_CUTOFF) %>%
-  ungroup() %>%
-  filter(country %in% top_country_range(., 1, 25, cases_new_per_mil)) %>%
-  plot_trend(days_since_limit_case_rate, cases_cum_per_mil, MAX_DAYS)
-```
+<!-- ### Case per capita trend for top 25 countries -->
 
-<!-- ### Case rate trend for top 11-20 countries -->
+<!-- Top 25 countries according to new cases per capita on `r latest_date`, countries with min. `r CASE_CUTOFF` cases. -->
 
 <!-- ```{r} -->
 <!-- data %>% -->
 <!--   group_by(country) %>% -->
 <!--   filter(max(cases_cum) >= CASE_CUTOFF) %>% -->
 <!--   ungroup() %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, cases_new_per_mil)) %>% -->
+<!--   filter(country %in% top_country_range(., 1, 25, cases_new_per_mil)) %>% -->
 <!--   plot_trend(days_since_limit_case_rate, cases_cum_per_mil, MAX_DAYS) -->
 <!-- ``` -->
 
-New case trends
-=======================================================================
+<!-- <!-- ### Case rate trend for top 11-20 countries --> -->
 
-Column {data-width=500}
------------------------------------------------------------------------
+<!-- <!-- ```{r} --> -->
+<!-- <!-- data %>% --> -->
+<!-- <!--   group_by(country) %>% --> -->
+<!-- <!--   filter(max(cases_cum) >= CASE_CUTOFF) %>% --> -->
+<!-- <!--   ungroup() %>% --> -->
+<!-- <!--   filter(country %in% top_country_range(., 11, 20, cases_new_per_mil)) %>% --> -->
+<!-- <!--   plot_trend(days_since_limit_case_rate, cases_cum_per_mil, MAX_DAYS) --> -->
+<!-- <!-- ``` --> -->
 
-### New case trend for top 25 countries
+<!-- New case trends -->
+<!-- ======================================================================= -->
 
-Top 25 countries according to new cases on `r latest_date`.
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
 
-```{r}
-data %>%
-  filter(country %in% top_country_range(., 1, 25, cases_new)) %>%
-  plot_trend(days_since_limit_case, cases_new_smooth, MAX_DAYS)
-```
+<!-- ### New case trend for top 25 countries -->
 
-<!-- ### New case trend for top 11-20 countries -->
+<!-- Top 25 countries according to new cases on `r latest_date`. -->
 
 <!-- ```{r} -->
 <!-- data %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, cases_new)) %>% -->
+<!--   filter(country %in% top_country_range(., 1, 25, cases_new)) %>% -->
 <!--   plot_trend(days_since_limit_case, cases_new_smooth, MAX_DAYS) -->
 <!-- ``` -->
 
+<!-- <!-- ### New case trend for top 11-20 countries --> -->
 
-Column {data-width=500}
------------------------------------------------------------------------
+<!-- <!-- ```{r} --> -->
+<!-- <!-- data %>% --> -->
+<!-- <!--   filter(country %in% top_country_range(., 11, 20, cases_new)) %>% --> -->
+<!-- <!--   plot_trend(days_since_limit_case, cases_new_smooth, MAX_DAYS) --> -->
+<!-- <!-- ``` --> -->
 
-### New cases per capita trend for top 25 countries
 
-Top 25 countries according to new cases per capita on `r latest_date`, countries with min. `r CASE_CUTOFF` cases.
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
 
-```{r}
-data %>%
-  group_by(country) %>%
-  filter(max(cases_cum) >= CASE_CUTOFF) %>%
-  ungroup() %>%
-  filter(country %in% top_country_range(., 1, 25, cases_new_per_mil)) %>%
-  plot_trend(days_since_limit_case_rate, cases_new_smooth_per_mil, MAX_DAYS)
-```
+<!-- ### New cases per capita trend for top 25 countries -->
 
-<!-- ### New case rate trend for top 11-20 countries -->
+<!-- Top 25 countries according to new cases per capita on `r latest_date`, countries with min. `r CASE_CUTOFF` cases. -->
 
 <!-- ```{r} -->
 <!-- data %>% -->
 <!--   group_by(country) %>% -->
 <!--   filter(max(cases_cum) >= CASE_CUTOFF) %>% -->
 <!--   ungroup() %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, cases_new_per_mil)) %>% -->
+<!--   filter(country %in% top_country_range(., 1, 25, cases_new_per_mil)) %>% -->
 <!--   plot_trend(days_since_limit_case_rate, cases_new_smooth_per_mil, MAX_DAYS) -->
 <!-- ``` -->
 
-Total death trends
-=======================================================================
+<!-- <!-- ### New case rate trend for top 11-20 countries --> -->
 
-Column {data-width=500}
------------------------------------------------------------------------
+<!-- <!-- ```{r} --> -->
+<!-- <!-- data %>% --> -->
+<!-- <!--   group_by(country) %>% --> -->
+<!-- <!--   filter(max(cases_cum) >= CASE_CUTOFF) %>% --> -->
+<!-- <!--   ungroup() %>% --> -->
+<!-- <!--   filter(country %in% top_country_range(., 11, 20, cases_new_per_mil)) %>% --> -->
+<!-- <!--   plot_trend(days_since_limit_case_rate, cases_new_smooth_per_mil, MAX_DAYS) --> -->
+<!-- <!-- ``` --> -->
 
-### Death trend for top 25 countries
+<!-- Total death trends -->
+<!-- ======================================================================= -->
 
-Top 25 countries according to new deaths on `r latest_date`.
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
 
-```{r}
-data %>%
-  filter(country %in% top_country_range(., 1, 25, deaths_new)) %>%
-  plot_trend(days_since_limit_death, deaths_cum, MAX_DAYS)
-```
+<!-- ### Death trend for top 25 countries -->
 
-<!-- ### Death trend for top 11-20 countries -->
+<!-- Top 25 countries according to new deaths on `r latest_date`. -->
 
 <!-- ```{r} -->
 <!-- data %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, deaths_new)) %>% -->
+<!--   filter(country %in% top_country_range(., 1, 25, deaths_new)) %>% -->
 <!--   plot_trend(days_since_limit_death, deaths_cum, MAX_DAYS) -->
 <!-- ``` -->
 
+<!-- <!-- ### Death trend for top 11-20 countries --> -->
 
-Column {data-width=500}
------------------------------------------------------------------------
+<!-- <!-- ```{r} --> -->
+<!-- <!-- data %>% --> -->
+<!-- <!--   filter(country %in% top_country_range(., 11, 20, deaths_new)) %>% --> -->
+<!-- <!--   plot_trend(days_since_limit_death, deaths_cum, MAX_DAYS) --> -->
+<!-- <!-- ``` --> -->
 
-### Deaths per capita trend for top 25 countries
 
-Top 25 countries according to new deaths per capita on `r latest_date`, countries with min. `r DEATH_CUTOFF` deaths.
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
 
-```{r}
-data %>%
-  group_by(country) %>%
-  filter(max(deaths_cum) >= DEATH_CUTOFF) %>%
-  ungroup() %>%
-  filter(country %in% top_country_range(., 1, 25, deaths_new_per_mil)) %>%
-  plot_trend(days_since_limit_death_rate, deaths_cum_per_mil, MAX_DAYS)
-```
+<!-- ### Deaths per capita trend for top 25 countries -->
 
-<!-- ### Death rate trend for top 11-20 countries -->
+<!-- Top 25 countries according to new deaths per capita on `r latest_date`, countries with min. `r DEATH_CUTOFF` deaths. -->
 
 <!-- ```{r} -->
 <!-- data %>% -->
 <!--   group_by(country) %>% -->
 <!--   filter(max(deaths_cum) >= DEATH_CUTOFF) %>% -->
 <!--   ungroup() %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, deaths_new_per_mil)) %>% -->
+<!--   filter(country %in% top_country_range(., 1, 25, deaths_new_per_mil)) %>% -->
 <!--   plot_trend(days_since_limit_death_rate, deaths_cum_per_mil, MAX_DAYS) -->
 <!-- ``` -->
 
-New death trends
-=======================================================================
+<!-- <!-- ### Death rate trend for top 11-20 countries --> -->
 
-Column {data-width=500}
------------------------------------------------------------------------
+<!-- <!-- ```{r} --> -->
+<!-- <!-- data %>% --> -->
+<!-- <!--   group_by(country) %>% --> -->
+<!-- <!--   filter(max(deaths_cum) >= DEATH_CUTOFF) %>% --> -->
+<!-- <!--   ungroup() %>% --> -->
+<!-- <!--   filter(country %in% top_country_range(., 11, 20, deaths_new_per_mil)) %>% --> -->
+<!-- <!--   plot_trend(days_since_limit_death_rate, deaths_cum_per_mil, MAX_DAYS) --> -->
+<!-- <!-- ``` --> -->
 
-### New death trend for top 25 countries
+<!-- New death trends -->
+<!-- ======================================================================= -->
 
-Top 25 countries according to new deaths on `r latest_date`.
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
 
-```{r}
-data %>%
-  filter(country %in% top_country_range(., 1, 25, deaths_new)) %>%
-  plot_trend(days_since_limit_death, deaths_new_smooth, MAX_DAYS)
-```
+<!-- ### New death trend for top 25 countries -->
 
-<!-- ### New death trend for top 11-20 countries -->
+<!-- Top 25 countries according to new deaths on `r latest_date`. -->
 
 <!-- ```{r} -->
 <!-- data %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, deaths_new)) %>% -->
+<!--   filter(country %in% top_country_range(., 1, 25, deaths_new)) %>% -->
 <!--   plot_trend(days_since_limit_death, deaths_new_smooth, MAX_DAYS) -->
 <!-- ``` -->
 
+<!-- <!-- ### New death trend for top 11-20 countries --> -->
 
-Column {data-width=500}
------------------------------------------------------------------------
+<!-- <!-- ```{r} --> -->
+<!-- <!-- data %>% --> -->
+<!-- <!--   filter(country %in% top_country_range(., 11, 20, deaths_new)) %>% --> -->
+<!-- <!--   plot_trend(days_since_limit_death, deaths_new_smooth, MAX_DAYS) --> -->
+<!-- <!-- ``` --> -->
 
-### New deaths per capita trend for top 25 countries
 
-Top 25 countries according to new deaths per capita on `r latest_date`, countries with min. `r DEATH_CUTOFF` deaths.
+<!-- Column {data-width=500} -->
+<!-- ----------------------------------------------------------------------- -->
 
-```{r}
-data %>%
-  group_by(country) %>%
-  filter(max(deaths_cum) >= DEATH_CUTOFF) %>%
-  ungroup() %>%
-  filter(country %in% top_country_range(., 1, 25, deaths_new_per_mil)) %>%
-  plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_mil, MAX_DAYS)
-```
+<!-- ### New deaths per capita trend for top 25 countries -->
 
-<!-- ### New death rate trend for top 11-20 countries -->
+<!-- Top 25 countries according to new deaths per capita on `r latest_date`, countries with min. `r DEATH_CUTOFF` deaths. -->
 
 <!-- ```{r} -->
 <!-- data %>% -->
 <!--   group_by(country) %>% -->
 <!--   filter(max(deaths_cum) >= DEATH_CUTOFF) %>% -->
 <!--   ungroup() %>% -->
-<!--   filter(country %in% top_country_range(., 11, 20, deaths_new_per_mil)) %>% -->
+<!--   filter(country %in% top_country_range(., 1, 25, deaths_new_per_mil)) %>% -->
 <!--   plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_mil, MAX_DAYS) -->
 <!-- ``` -->
+
+<!-- <!-- ### New death rate trend for top 11-20 countries --> -->
+
+<!-- <!-- ```{r} --> -->
+<!-- <!-- data %>% --> -->
+<!-- <!--   group_by(country) %>% --> -->
+<!-- <!--   filter(max(deaths_cum) >= DEATH_CUTOFF) %>% --> -->
+<!-- <!--   ungroup() %>% --> -->
+<!-- <!--   filter(country %in% top_country_range(., 11, 20, deaths_new_per_mil)) %>% --> -->
+<!-- <!--   plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_mil, MAX_DAYS) --> -->
+<!-- <!-- ``` --> -->
