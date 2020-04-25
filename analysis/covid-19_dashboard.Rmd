@@ -584,9 +584,9 @@ data_trend <- reactive({
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Trend for top 25 countries
+### Trend for top countries
 
-Top 25 countries according to new cases on `r latest_date`.
+Top countries according to new cases (deaths) on `r latest_date`.
 
 ```{r}
 renderPlotly({
@@ -613,9 +613,9 @@ renderPlotly({
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Trend per million for top 25 countries
+### Trend per million for top countries
 
-Top 25 countries according to new cases per capita on `r latest_date`, countries with min. `r CASE_CUTOFF` cases.
+Top countries according to new cases (deaths) per million on `r latest_date`.
 
 ```{r}
 renderPlotly({
