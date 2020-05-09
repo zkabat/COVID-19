@@ -42,8 +42,11 @@ plot_data <- function(data, date, var, group_var = NULL, n = 20, plotly = T) {
   group_var <- enquo(group_var)
   levels <- levels(pull(data, !!group_var))
   
+  if (!is.null(date_)) {
+    data <- filter(data, date == date_)
+  }
+  
   g <- data %>% 
-    filter(date == date_) %>% 
     top_n(n, !!var) %>% 
     slice(1:n) %>% # guarantee of the row cutoff
     ggplot(aes(y = reorder(country, !!var), x = !!var, fill = !!group_var)) + 
@@ -643,6 +646,17 @@ renderPlotly({
   }
 })
 ```
+
+<!-- ### Time slice view -->
+
+<!-- ```{r} -->
+<!-- renderPlotly({ -->
+<!--   data_trend_cases() %>%  -->
+<!--     filter(days_since_limit_case == 45) %>%  -->
+<!--     plot_data(date = NULL, var = cases_cum, group_var = region, n = input$nlines) -->
+<!-- }) -->
+<!-- ``` -->
+
 
 Column {data-width=500}
 -----------------------------------------------------------------------
