@@ -561,7 +561,8 @@ selectInput("region2", label = "Select region:",
             choices = c("All", region_opts), selected = "All")
 
 selectInput("subset", label = "Select subset:",
-            choices = c("Top cummulative", "Top new", "Top growth"),
+            choices = c("Top cummulative", "Top cumm. per million",
+                        "Top new", "Top new per million", "Top growth"),
             selected = "Top cummulative")
 
 sliderInput("maxdays", label = "Maximum days to plot:",
@@ -594,31 +595,37 @@ data_trend <- reactive({
 })
 
 data_trend_cases <- reactive({
-  if(input$subset == "Top cummulative") {
-    data_trend() %>% 
-      filter(country %in% top_countries(., input$nlines, cases_cum))
+  plotvar <- if(input$subset == "Top cummulative") {
+    quo(cases_cum)
+  } else if (input$subset == "Top cumm. per million") {
+    quo(cases_cum_per_mil)
   } else if (input$subset == "Top new") {
-    data_trend() %>%
-      filter(country %in% top_countries(., input$nlines, cases_new))
+    quo(cases_new)
+  } else if (input$subset == "Top new per million") {
+    quo(cases_new_per_mil)
   } else if (input$subset == "Top growth") {
-    data_trend() %>% 
-      filter(country %in% top_countries(., input$nlines, 
-                                        cases_3day_growth_rate_pct))
+    quo(cases_3day_growth_rate_pct)
   }
+  
+  data_trend() %>% 
+      filter(country %in% top_countries(., input$nlines, !!plotvar))
 })
 
 data_trend_deaths <- reactive({
-  if(input$subset == "Top cummulative") {
-    data_trend() %>% 
-      filter(country %in% top_countries(., input$nlines, deaths_cum))
+  plotvar <- if(input$subset == "Top cummulative") {
+    quo(deaths_cum)
+  } else if (input$subset == "Top cumm. per million") {
+    quo(deaths_cum_per_mil)
   } else if (input$subset == "Top new") {
-    data_trend() %>%
-      filter(country %in% top_countries(., input$nlines, deaths_new))
+    quo(deaths_new)
+  } else if (input$subset == "Top new per million") {
+    quo(deaths_new_per_mil)
   } else if (input$subset == "Top growth") {
-    data_trend() %>% 
-      filter(country %in% top_countries(., input$nlines, 
-                                        deaths_3day_growth_rate_pct))
+    quo(deaths_3day_growth_rate_pct)
   }
+  
+  data_trend() %>% 
+    filter(country %in% top_countries(., input$nlines, !!plotvar))
 })
 ```
 
