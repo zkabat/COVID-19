@@ -32,7 +32,6 @@ LIMIT_DEATH_RATE <- 1
 
 CASE_CUTOFF <- 1000
 DEATH_CUTOFF <- 50
-MAX_DAYS <- 50
 SMOOTH_WINDOW <- 7
 
 # Load functions
@@ -43,8 +42,11 @@ plot_data <- function(data, date, var, group_var = NULL, n = 20, plotly = T) {
   group_var <- enquo(group_var)
   levels <- levels(pull(data, !!group_var))
   
+  if (!is.null(date_)) {
+    data <- filter(data, date == date_)
+  }
+  
   g <- data %>% 
-    filter(date == date_) %>% 
     top_n(n, !!var) %>% 
     slice(1:n) %>% # guarantee of the row cutoff
     ggplot(aes(y = reorder(country, !!var), x = !!var, fill = !!group_var)) + 
@@ -176,8 +178,12 @@ cases <- time_series_covid19_confirmed_global %>%
   summarize(cases_cum = sum(cases_cum)) %>% 
   mutate(cases_new = cases_cum - dplyr::lag(cases_cum),
          cases_new_smooth = zoo::rollapply(cases_new, SMOOTH_WINDOW, mean, 
-                                           align = "center", fill = NA),
-         cases_growth_rate_pct = round(cases_new / lag(cases_cum) * 100, 1)) %>% 
+                                           align = "right", fill = NA),
+         cases_daily_growth_rate_pct = 
+           round(cases_new / lag(cases_cum) * 100, 1),
+         cases_3day_growth_rate_pct = round(
+           (zoo::rollapply(cases_new, 3, sum, align = "right", fill = NA)) /
+             lag(cases_cum, 3) * 100, 1)) %>% 
   ungroup()
 
 deaths <- time_series_covid19_deaths_global %>% 
@@ -192,8 +198,11 @@ deaths <- time_series_covid19_deaths_global %>%
   mutate(deaths_new = deaths_cum - dplyr::lag(deaths_cum),
          deaths_new_smooth = zoo::rollapply(deaths_new, SMOOTH_WINDOW, mean, 
                                             align = "center", fill = NA),
-         deaths_growth_rate_pct = round(deaths_new / lag(deaths_cum) * 100, 1)
-  ) %>% 
+         deaths_daily_growth_rate_pct = 
+           round(deaths_new / lag(deaths_cum) * 100, 1),
+         deaths_3day_growth_rate_pct = round(
+           (zoo::rollapply(deaths_new, 3, sum, align = "right", fill = NA)) /
+             lag(deaths_cum, 3) * 100, 1)) %>%  
   ungroup()
 
 recovered <- time_series_covid19_recovered_global %>% 
@@ -208,10 +217,7 @@ recovered <- time_series_covid19_recovered_global %>%
   mutate(recovered_new = recovered_cum - dplyr::lag(recovered_cum),
          recovered_new_smooth = 
            zoo::rollapply(recovered_new, SMOOTH_WINDOW, mean, 
-                          align = "center", fill = NA),
-         recovered_growth_rate_pct = 
-           round(recovered_new / lag(recovered_cum) * 100, 1)
-  ) %>% 
+                          align = "center", fill = NA)) %>% 
   ungroup()
 
 data <- cases %>% 
@@ -554,6 +560,14 @@ selectInput("metric2", label = "Select metric:",
 selectInput("region2", label = "Select region:", 
             choices = c("All", region_opts), selected = "All")
 
+selectInput("subset", label = "Select subset:",
+            choices = c("Top cummulative", "Top cumm. per million",
+                        "Top new", "Top new per million", "Top growth"),
+            selected = "Top cummulative")
+
+sliderInput("maxdays", label = "Maximum days to plot:",
+            min = 10, max = 100, value = 60, step = 10)
+
 sliderInput("nlines", label = "Countries to plot:",
             min = 5, max = 30, value = 20, step = 5)
 
@@ -579,6 +593,40 @@ data_trend <- reactive({
            max(deaths_cum) >= input$cutoff3) %>%
     ungroup()
 })
+
+data_trend_cases <- reactive({
+  plotvar <- if(input$subset == "Top cummulative") {
+    quo(cases_cum)
+  } else if (input$subset == "Top cumm. per million") {
+    quo(cases_cum_per_mil)
+  } else if (input$subset == "Top new") {
+    quo(cases_new)
+  } else if (input$subset == "Top new per million") {
+    quo(cases_new_per_mil)
+  } else if (input$subset == "Top growth") {
+    quo(cases_3day_growth_rate_pct)
+  }
+  
+  data_trend() %>% 
+      filter(country %in% top_countries(., input$nlines, !!plotvar))
+})
+
+data_trend_deaths <- reactive({
+  plotvar <- if(input$subset == "Top cummulative") {
+    quo(deaths_cum)
+  } else if (input$subset == "Top cumm. per million") {
+    quo(deaths_cum_per_mil)
+  } else if (input$subset == "Top new") {
+    quo(deaths_new)
+  } else if (input$subset == "Top new per million") {
+    quo(deaths_new_per_mil)
+  } else if (input$subset == "Top growth") {
+    quo(deaths_3day_growth_rate_pct)
+  }
+  
+  data_trend() %>% 
+    filter(country %in% top_countries(., input$nlines, !!plotvar))
+})
 ```
 
 Column {data-width=500}
@@ -586,55 +634,58 @@ Column {data-width=500}
 
 ### Trend for top countries
 
-Top countries according to new cases (deaths) on `r latest_date`.
+Top countries according to the selected subset on `r latest_date`.
 
 ```{r}
 renderPlotly({
   if (input$metric2 == "Total cases") {
-    data_trend() %>%
-      filter(country %in% top_country_range(., 1, input$nlines, cases_new)) %>%
-      plot_trend(days_since_limit_case, cases_cum, MAX_DAYS)
+    data_trend_cases() %>%
+      plot_trend(days_since_limit_case, cases_cum, input$maxdays)
   } else if (input$metric2 == "New cases") {
-    data_trend() %>%
-      filter(country %in% top_country_range(., 1, input$nlines, cases_new)) %>%
-      plot_trend(days_since_limit_case, cases_new_smooth, MAX_DAYS)
+    data_trend_cases() %>%
+      plot_trend(days_since_limit_case, cases_new_smooth, input$maxdays)
   } else if (input$metric2 == "Total deaths") {
-    data_trend() %>%
-      filter(country %in% top_country_range(., 1, input$nlines, deaths_new)) %>%
-      plot_trend(days_since_limit_death, deaths_cum, MAX_DAYS)
+    data_trend_deaths() %>%
+      plot_trend(days_since_limit_death, deaths_cum, input$maxdays)
   } else if (input$metric2 == "New deaths") {
-    data_trend() %>%
-      filter(country %in% top_country_range(., 1, input$nlines, deaths_new)) %>%
-      plot_trend(days_since_limit_death, deaths_new_smooth, MAX_DAYS)
+    data_trend_deaths() %>%
+      plot_trend(days_since_limit_death, deaths_new_smooth, input$maxdays)
   }
 })
 ```
+
+<!-- ### Time slice view -->
+
+<!-- ```{r} -->
+<!-- renderPlotly({ -->
+<!--   data_trend_cases() %>%  -->
+<!--     filter(days_since_limit_case == 45) %>%  -->
+<!--     plot_data(date = NULL, var = cases_cum, group_var = region, n = input$nlines) -->
+<!-- }) -->
+<!-- ``` -->
+
 
 Column {data-width=500}
 -----------------------------------------------------------------------
 
 ### Trend per million for top countries
 
-Top countries according to new cases (deaths) per million on `r latest_date`.
+Top countries according to the selected subset per million on `r latest_date`.
 
 ```{r}
 renderPlotly({
   if (input$metric2 == "Total cases") {
-    data_trend() %>%
-      filter(country %in% top_country_range(., 1, input$nlines, cases_new_per_mil)) %>%
-      plot_trend(days_since_limit_case_rate, cases_cum_per_mil, MAX_DAYS)
+    data_trend_cases() %>%
+      plot_trend(days_since_limit_case_rate, cases_cum_per_mil, input$maxdays)
   } else if (input$metric2 == "New cases") {
-    data_trend() %>%
-      filter(country %in% top_country_range(., 1, input$nlines, cases_new_per_mil)) %>%
-      plot_trend(days_since_limit_case_rate, cases_new_smooth_per_mil, MAX_DAYS)
+    data_trend_cases() %>%
+      plot_trend(days_since_limit_case_rate, cases_new_smooth_per_mil, input$maxdays)
   } else if (input$metric2 == "Total deaths") {
-    data_trend() %>%
-      filter(country %in% top_country_range(., 1, input$nlines, deaths_new_per_mil)) %>%
-      plot_trend(days_since_limit_death_rate, deaths_cum_per_mil, MAX_DAYS)
+    data_trend_deaths() %>%
+      plot_trend(days_since_limit_death_rate, deaths_cum_per_mil, input$maxdays)
   } else if (input$metric2 == "New deaths") {
-    data_trend() %>%
-      filter(country %in% top_country_range(., 1, input$nlines, deaths_new_per_mil)) %>%
-      plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_mil, MAX_DAYS)
+    data_trend_deaths() %>%
+      plot_trend(days_since_limit_death_rate, deaths_new_smooth_per_mil, input$maxdays)
   }
 })
 ```
