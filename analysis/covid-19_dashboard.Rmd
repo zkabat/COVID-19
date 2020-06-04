@@ -359,7 +359,8 @@ Column {data-width=400}
 g <- data_sum %>%
   filter(date >= dmy("01-03-2020")) %>%
   ggplot(aes(x = date, y = cases_new)) +
-  geom_point(color = "navy") + geom_smooth() + theme_light()
+  geom_col(fill = "navy") + 
+  theme_light()
 
 ggplotly(g)
 ```
@@ -370,7 +371,8 @@ ggplotly(g)
 g <- data_sum %>%
   filter(date >= dmy("01-03-2020")) %>%
   ggplot(aes(x = date, y = deaths_new)) +
-  geom_point(color = "navy") + geom_smooth() + theme_light()
+  geom_col(fill = "darkred") + 
+  theme_light()
 
 ggplotly(g)
 ```
@@ -381,7 +383,8 @@ ggplotly(g)
 g <- data_sum %>%
   filter(date >= dmy("01-03-2020")) %>%
   ggplot(aes(x = date, y = recovered_new)) +
-  geom_point(color = "navy") + geom_smooth() + theme_light()
+  geom_col(fill = "darkgreen") +
+  theme_light()
 
 ggplotly(g)
 ```
@@ -566,7 +569,7 @@ selectInput("subset", label = "Select subset:",
             selected = "Top cummulative")
 
 sliderInput("maxdays", label = "Maximum days to plot:",
-            min = 10, max = 100, value = 60, step = 10)
+            min = 60, max = 120, value = 90, step = 10)
 
 sliderInput("nlines", label = "Countries to plot:",
             min = 5, max = 30, value = 20, step = 5)
