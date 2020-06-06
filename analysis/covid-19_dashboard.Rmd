@@ -197,7 +197,7 @@ deaths <- time_series_covid19_deaths_global %>%
   summarize(deaths_cum = sum(deaths_cum)) %>% 
   mutate(deaths_new = deaths_cum - dplyr::lag(deaths_cum),
          deaths_new_smooth = zoo::rollapply(deaths_new, SMOOTH_WINDOW, mean, 
-                                            align = "center", fill = NA),
+                                            align = "right", fill = NA),
          deaths_daily_growth_rate_pct = 
            round(deaths_new / lag(deaths_cum) * 100, 1),
          deaths_3day_growth_rate_pct = round(
@@ -217,7 +217,7 @@ recovered <- time_series_covid19_recovered_global %>%
   mutate(recovered_new = recovered_cum - dplyr::lag(recovered_cum),
          recovered_new_smooth = 
            zoo::rollapply(recovered_new, SMOOTH_WINDOW, mean, 
-                          align = "center", fill = NA)) %>% 
+                          align = "right", fill = NA)) %>% 
   ungroup()
 
 data <- cases %>% 
@@ -404,6 +404,8 @@ selectInput("metric", label = "Select metric:",
             choices = c("Cases", "Deaths", "Recovered"), 
             selected = "Cases")
 
+checkboxInput("smoothed", "Smooth new", FALSE)
+
 selectInput("region", label = "Select region:", 
             choices = c("All", region_opts), selected = "All")
 
@@ -512,12 +514,18 @@ Column {data-width=500}
 
 ```{r}
 renderPlotly({
-  plotvar <- if (input$metric == "Cases") {
-    quo(cases_new)
-  } else if (input$metric == "Deaths") {
+  plotvar <- if (input$metric == "Cases" & input$smoothed == FALSE) {
+    quo(cases_new) 
+  } else if (input$metric == "Cases" & input$smoothed == TRUE) {
+    quo(cases_new_smooth)
+  } else if (input$metric == "Deaths" & input$smoothed == FALSE) {
     quo(deaths_new)
-  } else if (input$metric == "Recovered"){
+  } else if (input$metric == "Deaths" & input$smoothed == TRUE) {
+    quo(deaths_new_smooth)
+  } else if (input$metric == "Recovered" & input&smoothed == FALSE){
     quo(recovered_new)
+  } else if (input$metric == "Recovered" & input&smoothed == TRUE){
+    quo(recovered_new_smooth)
   }
   
   plot_data(data_last(), input$date, !!plotvar, region, input$nbars)
@@ -529,12 +537,18 @@ renderPlotly({
 
 ```{r}
 renderPlotly({
-  plotvar <- if (input$metric == "Cases") {
+  plotvar <- if (input$metric == "Cases" & input$smoothed == FALSE) {
     quo(cases_new_per_mil)
-  } else if (input$metric == "Deaths") {
+  } else if (input$metric == "Cases" & input$smoothed == TRUE) {
+    quo(cases_new_smooth_per_mil)
+  } else if (input$metric == "Deaths" & input$smoothed == FALSE) {
     quo(deaths_new_per_mil)
-  } else if (input$metric == "Recovered"){
+  } else if (input$metric == "Deaths" & input$smoothed == TRUE) {
+    quo(deaths_new_smooth_per_mil)
+  } else if (input$metric == "Recovered" & input$smoothed == FALSE){
     quo(recovered_new_per_mil)
+  } else if (input$metric == "Recovered" & input$smoothed == TRUE){
+    quo(recovered_new_smooth_per_mil)
   }
   
   plot_data(data_last(), input$date, !!plotvar, region, input$nbars)
