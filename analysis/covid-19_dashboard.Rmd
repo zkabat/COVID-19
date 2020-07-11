@@ -305,7 +305,13 @@ data_sum <- data %>%
   select(date, cases_cum, cases_new, deaths_cum, deaths_new,
          recovered_cum, recovered_new) %>%
   group_by(date) %>%
-  summarize_all(.funs = sum, na.rm = TRUE)
+  summarize_all(.funs = sum, na.rm = TRUE) %>% 
+  mutate(cases_new_smooth = zoo::rollapply(
+    cases_new, SMOOTH_WINDOW, mean, align = "right", fill = NA),
+    deaths_new_smooth = zoo::rollapply(
+      deaths_new, SMOOTH_WINDOW, mean, align = "right", fill = NA),
+    recovered_new_smooth = zoo::rollapply(
+      recovered_new, SMOOTH_WINDOW, mean, align = "right", fill = NA))
 
 data_map <- data %>% 
   filter(date == latest_date,
@@ -357,6 +363,8 @@ Column {data-width=600}
 ```{r}
 data_sum %>%
   arrange(desc(date)) %>%
+  select(date, cases_cum, cases_new, deaths_cum, deaths_new,
+         recovered_cum, recovered_new) %>% 
   datatable(colnames = c("Date", "Total cases", "New cases",
                          "Total deaths", "New deaths",
                          "Total recovered", "New recovered"),
@@ -372,8 +380,9 @@ Column {data-width=400}
 ```{r}
 g <- data_sum %>%
   filter(date >= dmy("01-03-2020")) %>%
-  ggplot(aes(x = date, y = cases_new)) +
-  geom_col(fill = "navy") + 
+  ggplot(aes(x = date)) +
+  geom_col(aes(y = cases_new), fill = "darkturquoise") +
+  geom_line(aes(y = dplyr::lead(cases_new_smooth, 3)), color = "blue") +
   theme_light()
 
 ggplotly(g)
@@ -384,8 +393,9 @@ ggplotly(g)
 ```{r}
 g <- data_sum %>%
   filter(date >= dmy("01-03-2020")) %>%
-  ggplot(aes(x = date, y = deaths_new)) +
-  geom_col(fill = "darkred") + 
+  ggplot(aes(x = date)) +
+  geom_col(aes(y = deaths_new), fill = "coral") +
+  geom_line(aes(y = dplyr::lead(deaths_new_smooth, 3)), color = "red") +
   theme_light()
 
 ggplotly(g)
@@ -396,8 +406,9 @@ ggplotly(g)
 ```{r}
 g <- data_sum %>%
   filter(date >= dmy("01-03-2020")) %>%
-  ggplot(aes(x = date, y = recovered_new)) +
-  geom_col(fill = "darkgreen") +
+  ggplot(aes(x = date)) +
+  geom_col(aes(y = recovered_new), fill = "aquamarine") +
+  geom_line(aes(y = dplyr::lead(recovered_new_smooth, 3)), color = "green") +
   theme_light()
 
 ggplotly(g)
