@@ -18,7 +18,7 @@ data %>%
 
 data %>% 
   group_by(country) %>% 
-  filter(max(cases_cum) >= 10000) %>% 
+  filter(max(cases_cum) >= 1000) %>% 
   mutate(cases_new = scales::squish(cases_new, 
                             quantile(cases_new, c(.01, .99), na.rm = T)),
          deaths_new = scales::squish(deaths_new, 
@@ -41,7 +41,7 @@ data %>%
 
 data %>% 
   group_by(country) %>% 
-  filter(max(cases_cum) >= 10000) %>% 
+  filter(max(cases_cum) >= 1000) %>% 
   mutate(cases_new = scales::squish(cases_new, 
                                     quantile(cases_new, c(.01, .99), na.rm = T)),
          deaths_new = scales::squish(deaths_new, 
@@ -61,4 +61,3 @@ data %>%
     desc = "Daily counts with 7-day rolling average",
     state = list(sort = list(sort_spec("deaths_cum_max", dir = "desc")))
   )
-
