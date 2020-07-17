@@ -408,7 +408,7 @@ g <- data_sum %>%
   filter(date >= dmy("01-03-2020")) %>%
   ggplot(aes(x = date)) +
   geom_col(aes(y = recovered_new), fill = "aquamarine") +
-  geom_line(aes(y = dplyr::lead(recovered_new_smooth, 3)), color = "green") +
+  geom_line(aes(y = dplyr::lead(recovered_new_smooth, 3)), color = "darkgreen") +
   theme_light()
 
 ggplotly(g)
