@@ -29,10 +29,8 @@ data %>%
          deaths_new, deaths_new_smooth, deaths_cum) %>% 
   ggplot(aes(x = date)) + 
   geom_col(aes(y = cases_new), fill = "darkturquoise") +
-  # geom_col(aes(y = deaths_new), fill = "orangered") +
   geom_line(aes(y = dplyr::lead(cases_new_smooth, 3)), color = "blue", size = 1) +
-  # geom_line(aes(y = dplyr::lead(deaths_new_smooth, 3)), color = "red", size = 1) +
-  facet_trelliscope(
+  trelliscopejs::facet_trelliscope(
     ~country, nrow = 2, ncol = 5, scales = c("same", "free"), as_plotly = F,
     name = "Statistics by country",  
     desc = "Daily counts with 7-day rolling average",
@@ -52,10 +50,8 @@ data %>%
          deaths_new, deaths_new_smooth, deaths_cum) %>% 
   ggplot(aes(x = date)) + 
   geom_col(aes(y = deaths_new), fill = "orange") +
-  # geom_col(aes(y = deaths_new), fill = "orangered") +
   geom_line(aes(y = dplyr::lead(deaths_new_smooth, 3)), color = "red", size = 1) +
-  # geom_line(aes(y = dplyr::lead(deaths_new_smooth, 3)), color = "red", size = 1) +
-  facet_trelliscope(
+  trelliscopejs::facet_trelliscope(
     ~country, nrow = 2, ncol = 5, scales = c("same", "free"), as_plotly = F,
     name = "Statistics by country",  
     desc = "Daily counts with 7-day rolling average",
