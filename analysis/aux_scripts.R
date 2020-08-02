@@ -57,3 +57,51 @@ data %>%
     desc = "Daily counts with 7-day rolling average",
     state = list(sort = list(sort_spec("deaths_cum_max", dir = "desc")))
   )
+
+data %>% 
+  group_by(country) %>% 
+  filter(max(cases_cum) >= 1000) %>% 
+  mutate(cases_new_per_mil = 
+           scales::squish(cases_new_per_mil, 
+                          quantile(cases_new_per_mil, c(.01, .99), na.rm = T)),
+         deaths_new_per_mil = 
+           scales::squish(deaths_new_per_mil, 
+                          quantile(deaths_new_per_mil, c(.01, .99), na.rm = T))) %>% 
+  ungroup() %>% 
+  filter(date >= dmy("01-03-2020")) %>% 
+  select(country, date, 
+         cases_new_per_mil, cases_new_smooth_per_mil, cases_cum_per_mil,
+         deaths_new_per_mil, deaths_new_smooth_per_mil, deaths_cum_per_mil) %>% 
+  ggplot(aes(x = date)) + 
+  geom_col(aes(y = cases_new_per_mil), fill = "darkturquoise") +
+  geom_line(aes(y = dplyr::lead(cases_new_smooth_per_mil, 3)), color = "blue", size = 1) +
+  trelliscopejs::facet_trelliscope(
+    ~country, nrow = 2, ncol = 5, scales = c("same", "free"), as_plotly = F,
+    name = "Statistics by country",  
+    desc = "Daily counts with 7-day rolling average",
+    state = list(sort = list(sort_spec("cases_cum_per_mil_max", dir = "desc")))
+  )
+
+data %>% 
+  group_by(country) %>% 
+  filter(max(cases_cum) >= 1000) %>% 
+  mutate(cases_new_per_mil = 
+           scales::squish(cases_new_per_mil, 
+                          quantile(cases_new_per_mil, c(.01, .99), na.rm = T)),
+         deaths_new_per_mil = 
+           scales::squish(deaths_new_per_mil, 
+                          quantile(deaths_new_per_mil, c(.01, .99), na.rm = T))) %>% 
+  ungroup() %>% 
+  filter(date >= dmy("01-03-2020")) %>% 
+  select(country, date, 
+         cases_new_per_mil, cases_new_smooth_per_mil, cases_cum_per_mil,
+         deaths_new_per_mil, deaths_new_smooth_per_mil, deaths_cum_per_mil) %>% 
+  ggplot(aes(x = date)) + 
+  geom_col(aes(y = deaths_new_per_mil), fill = "orange") +
+  geom_line(aes(y = dplyr::lead(deaths_new_smooth_per_mil, 3)), color = "red", size = 1) +
+  trelliscopejs::facet_trelliscope(
+    ~country, nrow = 2, ncol = 5, scales = c("same", "free"), as_plotly = F,
+    name = "Statistics by country",  
+    desc = "Daily counts with 7-day rolling average",
+    state = list(sort = list(sort_spec("deaths_cum_per_mil_max", dir = "desc")))
+  )
