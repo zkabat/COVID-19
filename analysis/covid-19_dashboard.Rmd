@@ -610,7 +610,7 @@ selectInput("subset", label = "Select subset:",
             selected = "Top cummulative")
 
 sliderInput("maxdays", label = "Maximum days to plot:",
-            min = 90, max = 150, value = 120, step = 10)
+            min = 120, max = 200, value = 150, step = 10)
 
 sliderInput("nlines", label = "Countries to plot:",
             min = 5, max = 30, value = 20, step = 5)
