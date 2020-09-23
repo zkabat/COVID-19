@@ -463,30 +463,51 @@ Column {data-width=500}
 ```{r}
 renderDT({
   if (input$metric == "Cases") {
+    if (input$smoothed) {
+      cases_t <- quo(cases_new_smooth)
+      cases_per_mil_t <- quo(cases_new_smooth_per_mil)
+    } else {
+      cases_t <- quo(cases_new)
+      cases_per_mil_t <- quo(cases_new_per_mil)
+    }
     data_last() %>%
       filter(date == input$date) %>%
-      select(country, cases_cum, cases_new,
-             cases_cum_per_mil, cases_new_per_mil) %>%
+      select(country, cases_cum, !!cases_t,
+             cases_cum_per_mil, !!cases_per_mil_t) %>%
       arrange(desc(cases_cum)) %>%
       datatable(colnames = c("Country", "Total cases", "New cases",
                              "Total cases per mil", "New cases per mil"),
                 rownames = FALSE,
                 options = list(pageLength = 15))
   } else if (input$metric == "Deaths") {
+    if (input$smoothed) {
+      deaths_t <- quo(deaths_new_smooth)
+      deaths_per_mil_t <- quo(deaths_new_smooth_per_mil)
+    } else {
+      deaths_t <- quo(deaths_new)
+      deaths_per_mil_t <- quo(deaths_new_per_mil)
+    }
     data_last() %>%
       filter(date == input$date) %>%
-      select(country, deaths_cum, deaths_new,
-             deaths_cum_per_mil, deaths_new_per_mil) %>%
+      select(country, deaths_cum, !!deaths_t,
+             deaths_cum_per_mil, !!deaths_per_mil_t) %>%
       arrange(desc(deaths_cum)) %>%
       datatable(colnames = c("Country", "Total deaths", "New deaths",
                              "Total deaths per mil", "New deaths per mil"),
                 rownames = FALSE,
                 options = list(pageLength = 15))
   } else if (input$metric == "Recovered") {
+    if (input$smoothed) {
+      recovered_t <- quo(recovered_new_smooth)
+      recovered_per_mil_t <- quo(recovered_new_smooth_per_mil)
+    } else {
+      recovered_t <- quo(recovered_new)
+      recovered_per_mil_t <- quo(recovered_new_per_mil)
+    }
     data_last() %>%
       filter(date == input$date) %>%
-      select(country, recovered_cum, recovered_new,
-             recovered_cum_per_mil, recovered_new_per_mil) %>%
+      select(country, recovered_cum, !!recovered_t,
+             recovered_cum_per_mil, !!recovered_per_mil_t) %>%
       arrange(desc(recovered_cum)) %>%
       datatable(colnames = c("Country", "Total recovered", "New recovered",
                              "Total recovered per mil", "New recovered per mil"),
