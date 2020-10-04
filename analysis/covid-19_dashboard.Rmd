@@ -388,7 +388,7 @@ g <- data_sum %>%
   geom_line(aes(y = dplyr::lead(cases_new_smooth, 3)), color = "blue") +
   theme_light()
 
-ggplotly(g)
+ggplotly(g, height = 240, width = 720)
 ```
 
 ### Global new deaths
@@ -401,7 +401,7 @@ g <- data_sum %>%
   geom_line(aes(y = dplyr::lead(deaths_new_smooth, 3)), color = "red") +
   theme_light()
 
-ggplotly(g)
+ggplotly(g, height = 240, width = 720)
 ```
 
 ### Global new recovered
@@ -414,7 +414,7 @@ g <- data_sum %>%
   geom_line(aes(y = dplyr::lead(recovered_new_smooth, 3)), color = "darkgreen") +
   theme_light()
 
-ggplotly(g)
+ggplotly(g, height = 240, width = 720)
 ```
 
 Daily overview
