@@ -10,7 +10,6 @@ output:
 
 ```{r setup, include=FALSE}
 
-
 # Load libraries
 
 library(flexdashboard)
@@ -441,7 +440,7 @@ sliderInput("nbars", label = "Countries to plot:",
             min = 5, max = 30, value = 20, step = 5)
 
 sliderInput("cutoff", label = "Select case lower bound:",
-            min = 0, max = 1000, value = 1000, step = 100)
+            min = 0, max = 10000, value = 1000, step = 1000)
 ```
 
 ```{r}
@@ -641,7 +640,7 @@ sliderInput("cutoff2", label = "Select case lower bound:",
             min = 0, max = 1000, value = 1000, step = 100)
 
 sliderInput("cutoff3", label = "Select death lower bound:",
-            min = 0, max = 100, value = 100, step = 10)
+            min = 0, max = 1000, value = 100, step = 100)
 ```
 
 
