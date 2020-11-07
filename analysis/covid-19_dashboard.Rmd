@@ -241,6 +241,7 @@ data <- cases %>%
   full_join(recovered)
 
 data <- data %>%
+  filter(!is.na(country)) %>% 
   group_by(country) %>% 
   mutate(case_ind = ifelse(cases_cum >= LIMIT_CASE, 1, 0),
          days_since_limit_case = cumsum(case_ind),
