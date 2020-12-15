@@ -259,7 +259,7 @@ mapping <- tibble(
       "Russian Federation", "St. Kitts and Nevis", "St. Lucia" , 
       "St. Vincent and the Grenadines", "Slovak Republic", 
       "Syrian Arab Republic", "Taiwan*", "United States", "Venezuela, RB",
-      "Western Sahara", "Yemen, Rep."),
+      "Yemen, Rep."),
   country_covid = as.character(setdiff(data$country, pop_raw$country))
 )
 
