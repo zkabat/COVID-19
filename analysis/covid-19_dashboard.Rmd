@@ -255,7 +255,7 @@ mapping <- tibble(
     c("Bahamas, The", "Brunei Darussalam", "Myanmar", "Congo, Rep.", 
       "Congo, Dem. Rep.", "Czech Republic", "Diamond Princess", 
       "Egypt, Arab Rep.", "Gambia, The", "Holy See", "Iran, Islamic Rep.", 
-      "Korea, Rep.", "Kyrgyz Republic", "Lao PDR", "MS Zaandam", 
+      "Korea, Rep.", "Kyrgyz Republic", "Lao PDR", "Micronesia", "MS Zaandam", 
       "Russian Federation", "St. Kitts and Nevis", "St. Lucia" , 
       "St. Vincent and the Grenadines", "Slovak Republic", 
       "Syrian Arab Republic", "Taiwan*", "United States", "Venezuela, RB",
