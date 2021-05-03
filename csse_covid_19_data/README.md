@@ -214,6 +214,7 @@ Date: Location | Change | Files affected | Reason/Other notes | Source
 * April 19, 2021 | Ohio, US | To match Ohio’s new reporting standards, the Ohio death time series is being overwritten with date of death data, and the entire time series will be updated with each time Ohio updates their death data. This is expected to occur approximately twice per week. | [Data Source](https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv)
 * April 22, 2021 | Ohio, US | To match Ohio’s new reporting standards, the Ohio death time series is being overwritten with date of death data, and the entire time series will be updated with each time Ohio updates their death data. This is expected to occur approximately twice per week. | [Data Source](https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv)
 * April 26, 2021 | Ohio, US | To match Ohio’s new reporting standards, the Ohio death time series is being overwritten with date of death data, and the entire time series will be updated with each time Ohio updates their death data. This is expected to occur approximately twice per week. | [Data Source](https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv)
+* April 28, 2021 | Ohio, US | To match Ohio’s new reporting standards, the Ohio death time series is being overwritten with date of death data, and the entire time series will be updated with each time Ohio updates their death data. This is expected to occur approximately twice per week. | [Data Source](https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv)
 
 
 ## Retrospective reporting of (probable) cases and deaths
@@ -370,7 +371,7 @@ United States
 * Ohio: Providing death data twice per week (normally Tuesdays and Sundays).
 * Oklahoma: Only updating deaths and county-level case data on Tuesdays. State level case data updated Monday-Friday.
 * Rhode Island: Providing state level data Monday-Friday. County level cases and death data is released once per week.
-* South Dakota: Providing data Monday-Saturday.
+* South Dakota: Providing data Monday-Friday.
 * Tennessee: Providing data Monday-Friday.
 * Washington: Did not update October 10-12 due to data entry issue. As of December 20, only updating Monday-Saturday.
 * Wyoming: Providing data Monday-Friday.
