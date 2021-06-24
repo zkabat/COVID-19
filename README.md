@@ -162,6 +162,8 @@ This list includes a complete list of all sources ever used in the data set, sin
 
   
 - Non-US data sources at the country/region (Admin0) or state/province (Admin1) level:
+  - Albania:
+    - National Agency for Information Society: https://coronavirus.al/statistika/
   - Australia:
     - Government Department of Health: https://www.health.gov.au/news/coronavirus-update-at-a-glance
     - COVID Live: https://www.covidlive.com.au/
@@ -242,6 +244,8 @@ This list includes a complete list of all sources ever used in the data set, sin
   - Kosovo:
     - National Institute of Health of Kosovo Dashboard: https://corona-ks.info/?lang=en
     - National Institute of Health of Kosovo JSON: https://raw.githubusercontent.com/bgeVam/Kosovo-Coronatracker-Data/master/data.json 
+  - Lebanon  
+    - Lebanese Ministry Of Information: https://corona.ministryinfo.gov.lb/
   - Lithuania: 
     - Government of Lithuania: https://experience.arcgis.com/experience/cab84dcfe0464c2a8050a78f817924ca
   - Luxembourg: 
@@ -252,6 +256,8 @@ This list includes a complete list of all sources ever used in the data set, sin
     - Government of Mexico: https://datos.covid-19.conacyt.mx/#DOView
   - Netherlands:
     - National Institute for Health and Environment: https://experience.arcgis.com/experience/ea064047519040469acb8da05c0f100d
+  - Palau:
+    - http://www.palauhealth.org/2019nCoV_SitRep/MOH-COVID-19%20Situation%20Report.pdf 
   - Pakistan:
     - Government of Pakistan: http://covid.gov.pk/stats/pakistan
   - Peru:
@@ -259,8 +265,12 @@ This list includes a complete list of all sources ever used in the data set, sin
     - Ministry of Health of Peru: https://covid19.minsa.gob.pe/sala_situacional.asp
   - Poland: 
     - Service of the Republic of Poland: https://www.gov.pl/web/koronawirus/wykaz-zarazen-koronawirusem-sars-cov-2
+  - Romania:
+    - Government of Romania: https://datelazi.ro/ 
   - Russia: 
     - Government of The Russian Federation: https://xn--80aesfpebagmfblc0a.xn--p1ai/information/
+  - Saudi Arabia:
+    - Saudi Arabia Ministry of Health: https://covid19.moh.gov.sa/  
   - Serbia:
     - Ministry of Health of the Republic of Serbia: https://covid19.rs/homepage-english/ 
   - Singapore:

@@ -1642,7 +1642,7 @@ FIPS,Admin2,Province_State,Country_Region,Last_Update,Lat,Long_,Confirmed,Deaths
 21153,Magoffin,Kentucky,US,2020-05-18 02:32:21,37.70820545,-83.0657714,1,0,0,1,"Magoffin, Kentucky, US"
 19123,Mahaska,Iowa,US,2020-05-18 02:32:21,41.33521503,-92.64083907,24,1,0,23,"Mahaska, Iowa, US"
 27087,Mahnomen,Minnesota,US,2020-05-18 02:32:21,47.32557075,-95.80921485,5,1,0,4,"Mahnomen, Minnesota, US"
-39099,Mahoning,Ohio,US,2020-05-18 02:32:21,41.01631101,-80.77287029,1212,158,0,1066,"Mahoning, Ohio, US"
+39099,Mahoning,Ohio,US,2020-05-18 02:32:21,41.01631101,-80.77287029,1212,159,0,1066,"Mahoning, Ohio, US"
 40093,Major,Oklahoma,US,2020-05-18 02:32:21,36.31149996,-98.53467076,6,1,0,5,"Major, Oklahoma, US"
 41045,Malheur,Oregon,US,2020-05-18 02:32:21,43.1937027,-117.6227395,19,0,0,19,"Malheur, Oregon, US"
 51683,Manassas,Virginia,US,2020-05-18 02:32:21,38.7464321,-77.48509905,594,5,0,589,"Manassas, Virginia, US"
@@ -1667,7 +1667,7 @@ FIPS,Admin2,Province_State,Country_Region,Last_Update,Lat,Long_,Confirmed,Deaths
 21155,Marion,Kentucky,US,2020-05-18 02:32:21,37.55218078,-85.26898542,17,0,0,17,"Marion, Kentucky, US"
 28091,Marion,Mississippi,US,2020-05-18 02:32:21,31.23132643,-89.8209217,89,8,0,81,"Marion, Mississippi, US"
 29127,Marion,Missouri,US,2020-05-18 02:32:21,39.80601912,-91.62203062,5,0,0,5,"Marion, Missouri, US"
-39101,Marion,Ohio,US,2020-05-18 02:32:21,40.58610662,-83.15736305,2500,13,0,2485,"Marion, Ohio, US"
+39101,Marion,Ohio,US,2020-05-18 02:32:21,40.58610662,-83.15736305,2500,14,0,2485,"Marion, Ohio, US"
 41047,Marion,Oregon,US,2020-05-18 02:32:21,44.90287942,-122.5815117,827,23,0,804,"Marion, Oregon, US"
 45067,Marion,South Carolina,US,2020-05-18 02:32:21,34.07859748,-79.36400756,51,4,0,47,"Marion, South Carolina, US"
 47115,Marion,Tennessee,US,2020-05-18 02:32:21,35.12997174,-85.62265895,32,1,0,31,"Marion, Tennessee, US"
@@ -3312,3 +3312,5 @@ FIPS,Admin2,Province_State,Country_Region,Last_Update,Lat,Long_,Confirmed,Deaths
 2063,Chugach,Alaska,US,2021-04-02 15:13:53,61.16666,-149.9,1,0,0,0,"Chugach, Alaska, US"
 ,,Unknown,China,2020-05-18 02:32:21,,,0,0,0,0,"Unknown, China"
 ,,,Kiribati,2020-05-18 02:32:21,-3.3704,-168.734,0,0,0,0,Kiribati
+,,,Palau,2020-05-18 02:32:21,-3.3704,-168.734,0,0,0,0,Palau
+,,Cook Islands,New Zealand,2020-05-18 02:32:21,-3.3704,-168.734,0,0,0,0,"Cook Islands, New Zealand"

@@ -223,6 +223,10 @@ Date: Location | Change | Files affected | Reason/Other notes | Source
 * June 01, 2021 | Ohio, US | To match Ohio’s new reporting standards, the Ohio death time series is being overwritten with date of death data, and the entire time series will be updated with each time Ohio updates their death data. This is expected to occur approximately twice per week. | [Data Source](https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv)
 * June 07, 2021 | Ohio, US | To match Ohio’s new reporting standards, the Ohio death time series is being overwritten with date of death data, and the entire time series will be updated with each time Ohio updates their death data. This is expected to occur approximately twice per week. | [Data Source](https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv)
 * June 07, 2021 | Peru | Back distribution of deaths to account for release of backlogged deaths from Peru's Ministry of Health | [Data Source](https://www.datosabiertos.gob.pe/dataset/fallecidos-por-covid-19-ministerio-de-salud-minsa)
+* June 11, 2021 | California, US | Back correction of Alameda, California's deaths due to adjustment of death counts to agree with the state definition. | [Data Source](https://covid19.ca.gov/state-dashboard/#location-alameda)
+* June 13, 2021 | Ohio, US | To match Ohio’s new reporting standards, the Ohio death time series is being overwritten with date of death data, and the entire time series will be updated with each time Ohio updates their death data. This is expected to occur approximately twice per week. | [Data Source](https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv)
+* June 14, 2021 | Singapore | Data for June 12 updated to match news source | [Source](https://www.straitstimes.com/singapore/nine-new-community-cases-cleaner-at-ion-orchard-among-5-unlinked-covid-19-cases)
+* June 21, 2021 | Ohio, US | To match Ohio’s new reporting standards, the Ohio death time series is being overwritten with date of death data, and the entire time series will be updated with each time Ohio updates their death data. This is expected to occur approximately twice per week. | [Data Source](https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv)
 
 
 ## Retrospective reporting of (probable) cases and deaths
@@ -349,6 +353,8 @@ Date: Location | Change | Reason/Other notes | Source
 * June 1, 2021: Kentucky, US | Addition of 260 backlogged deaths identified from a death certificate audit | [Source](https://www.kentucky.com/news/coronavirus/article251818393.html)
 * June 3, 2021: Indiana, US | Addition of 765 backlogged cases | [Source](https://www.wthr.com/article/news/health/coronavirus/coronavirus-numbers/indiana-coronavirus-updates-for-thursday-june-3-2021/531-a05e1e2f-019d-42e7-8a54-fb923fe14383)
 * June 6, 2021: San Mateo, California, US | Addition of 85 backlogged deaths | [Source](https://covid19.ca.gov/state-dashboard/#location-san_mateo) - "Today’s case count includes 186 deaths from San Mateo county from prior months that were not previously reported." Importantly, our data for San Mateo had not previously come from the state dashboard, explaining why our daily deaths is <186.
+* June 9, 2021: West Virginia, US | Inclusion of 18 deaths from death certificate review | [Source](https://wvmetronews.com/2021/06/09/dhhr-adds-24-additional-covid-19-deaths-to-state-numbers/)
+* June 11, 2021: Alaska, US | Inclusion of four deaths identified through death certificate review | [Source](https://www.adn.com/alaska-news/2021/06/11/tracking-covid-19-in-alaska-49-cases-reported-over-2-days-and-4-deaths-identified-in-certificate-review/)
 
 ## Large-scale back distributions
 This section will serve to notify developers when we are able to successfully backdistribute any of the large instances of retrospective reporting.
@@ -386,16 +392,19 @@ As the pandemic has progressed, several locations have altered their reporting s
 
 United States
 * Alabama: Providing data Monday, Wednesday, and Friday
-* Alaska: Providing data Monday-Friday, excluding holidays.
+* Alaska: Providing data Monday, Wednesday, and Friday, excluding holidays.
 * Conneticut: Providing data Monday-Friday.
 * District of Columbia: Providing data Monday-Friday.
 * Florida: Providing data once per week (Fridays).
 * Guam: Providing data Monday-Friday.
 * Idaho: Providing data Monday-Friday.
+* Illinois: Providing data Monday-Friday.
+* Indiana: Providing data Monday-Saturday.
 * Kansas: Providing data Monday, Wednesdays, and Fridays. No data for the weekend of August 22-23.
+* Kentucky: Providing data Monday-Friday.
 * Louisiana: Providing data Monday-Friday.
 * Montana: Providing data Monday-Friday.
-* Michigan: Providing data Monday-Saturday. No case data provided for August 21.
+* Michigan: Providing data Monday-Friday. No case data provided for August 21.
 * Mississippi: Providing data Monday-Friday.
 * Nebraska: Providing data Monday-Friday. No county-level data available at this time.
 * Nevada: Providing data Monday-Friday.
@@ -404,6 +413,7 @@ United States
 * Ohio: Providing death data twice per week (normally Tuesdays and Sundays).
 * Oklahoma: Only updating deaths and county-level case data on Tuesdays. State level case data updated Monday-Friday.
 * Rhode Island: Providing state level data Monday-Friday. County level cases and death data is released once per week.
+* South Carlina: Providing data Monday-Friday.
 * South Dakota: Providing data Monday-Friday.
 * Tennessee: Providing data Monday-Friday.
 * Vermont: Providing data Monday-Friday.
